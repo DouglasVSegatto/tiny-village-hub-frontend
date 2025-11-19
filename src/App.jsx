@@ -1,0 +1,61 @@
+// src/App.jsx 🏡
+
+import React from 'react';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import AuthProvider from './context/AuthContext.jsx';
+
+// Import Core Layout and Utility Components
+import Navigation from './components/Navigation.jsx';
+import AuthContext from './context/AuthContext.jsx'; // We'll create this next
+
+// Import Views (Components that map to full pages)
+import ItemListView from './views/ItemListView.jsx'; // Component for all public items
+import ItemDetails from './views/ItemDetails.jsx';   // Component for single item view
+import Login from './components/Login.jsx';
+import Register from './components/Register.jsx';
+import Profile from './views/Profile.jsx';
+import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Protected User Dashboard/Profile
+
+
+// --- Placeholder Components ---
+// Ensure these files exist in your views/components folder.
+const Home = () => (
+    <div style={{textAlign: 'center', marginTop: '50px'}}>
+        <h1>Welcome to Tiny Village Hub!</h1>
+        <p>Your local marketplace for sharing and trading items.</p>
+        <p>Use the navigation links above to get started.</p>
+    </div>
+);
+const NotFound = () => <h2>404 - Page Not Found</h2>;
+
+// --- Main Application Structure ---
+
+function App() {
+    // Note: We wrap the entire application in AuthContext to manage global login state
+    return (
+        <AuthProvider>
+            <Router>
+                <Navigation/>
+                <div style={{padding: '20px'}}>
+                    <Routes>
+                        <Route path="/" element={<Home/>}/>
+                        <Route path="/list" element={<ItemListView/>}/>
+                        <Route path="/items/:itemId" element={<ItemDetails/>}/>
+
+                        {/* Authentication Routes */}
+                        <Route path="/login" element={<Login/>}/>
+                        <Route path="/register" element={<Register/>}/>
+
+                        {/* Protected Routes */}
+                        <Route path="/profile" element={<ProtectedRoute/>}/>
+
+                        {/* Fallback Route */}
+                        <Route path="*" element={<NotFound/>}/>
+                    </Routes>
+                </div>
+            </Router>
+        </AuthProvider>
+    );
+}
+
+export default App;
