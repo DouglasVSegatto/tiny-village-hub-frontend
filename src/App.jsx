@@ -21,7 +21,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Prote
 // Ensure these files exist in your views/components folder.
 const Home = () => (
     <div style={{textAlign: 'center', marginTop: '50px'}}>
-        <h1>Welcome to Tiny Village Hub!</h1>
+        <h1>Welcome to Tiny Village!</h1>
         <p>Your local marketplace for sharing and trading items.</p>
         <p>Use the navigation links above to get started.</p>
     </div>

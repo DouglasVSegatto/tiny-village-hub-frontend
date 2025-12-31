@@ -31,7 +31,7 @@ const isAuthenticated = () => {
 // --- API Functions (Login and Register) ---
 
 const login = async (username, password) => {
-    const response = await fetch(`${API_BASE_URL}/auth/authenticate`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
