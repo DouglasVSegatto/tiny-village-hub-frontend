@@ -20,7 +20,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Prote
 // --- Placeholder Components ---
 // Ensure these files exist in your views/components folder.
 const Home = () => (
-    <div style={{textAlign: 'center', marginTop: '50px'}}>
+    <div className="text-center mt-5">
         <h1>Welcome to Tiny Village!</h1>
         <p>Your local marketplace for sharing and trading items.</p>
         <p>Use the navigation links above to get started.</p>
@@ -36,7 +36,7 @@ function App() {
         <AuthProvider>
             <Router>
                 <Navigation/>
-                <div style={{padding: '20px'}}>
+                <div className="container-fluid p-3 min-vh-100">
                     <Routes>
                         <Route path="/" element={<Home/>}/>
                         <Route path="/list" element={<ItemListView/>}/>
