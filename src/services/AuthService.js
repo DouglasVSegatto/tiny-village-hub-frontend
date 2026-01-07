@@ -52,13 +52,21 @@ const login = async (username, password) => {
     throw new Error('Login failed: Invalid credentials.');
 };
 
-const register = async (username, password, email) => {
+const register = async (username, password, email, neighborhood, city, state, country) => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, email }),
+        body: JSON.stringify({
+            username,
+            password,
+            email,
+            neighborhood,
+            city,
+            state,
+            country
+        }),
     });
 
     if (response.ok) {
