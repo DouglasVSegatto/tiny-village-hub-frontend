@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import AuthProvider from './context/AuthContext.jsx';
+import AuthProvider, {useAuth} from './context/AuthContext.jsx';
 
 // Import Core Layout and Utility Components
 import Navigation from './components/Navigation.jsx';
@@ -19,13 +19,19 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Prote
 
 // --- Placeholder Components ---
 // Ensure these files exist in your views/components folder.
-const Home = () => (
-    <div className="text-center mt-5">
-        <h1>Welcome to Tiny Village!</h1>
-        <p>Your local marketplace for sharing and trading items.</p>
-        <p>Use the navigation links above to get started.</p>
-    </div>
-);
+const Home = () => {
+    const { isAuthenticated, user } = useAuth();
+
+    return (
+        <div className="text-center mt-5">
+            <h1>
+                {isAuthenticated ? `Hello, ${user?.username}!` : 'Welcome to Tiny Village!'}
+            </h1>
+            <p>Your local marketplace for sharing and trading items.</p>
+            <p>Use the navigation links above to get started.</p>
+        </div>
+    );
+};
 const NotFound = () => <h2>404 - Page Not Found</h2>;
 
 // --- Main Application Structure ---
