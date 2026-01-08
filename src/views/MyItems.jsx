@@ -122,6 +122,7 @@ const MyItems = () => {
                                     <option value="BOOK">Book</option>
                                     <option value="ELECTRONICS">Electronics</option>
                                     <option value="CLOTHING">Clothing</option>
+                                    <option value="TOY">Toy</option>
                                     <option value="FURNITURE">Furniture</option>
                                     <option value="OTHER">Other</option>
                                 </select>
