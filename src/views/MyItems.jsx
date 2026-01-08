@@ -138,8 +138,8 @@ const MyItems = () => {
                                 >
                                     <option value="">Select availability...</option>
                                     <option value="TRADE">Trade</option>
-                                    <option value="LEND">Lend</option>
-                                    <option value="GIVE">Give Away</option>
+                                    <option value="SHARE">Share</option>
+                                    <option value="DONATION">Give Away/Donate</option>
                                 </select>
                             </div>
 
