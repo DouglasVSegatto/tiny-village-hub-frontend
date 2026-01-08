@@ -29,7 +29,7 @@ const isAuthenticated = () => {
     return !!getAccessToken();
 };
 
-// --- API Functions (Login and Register) ---
+// --- API Functions (Login, Register and Refresh Token) ---
 
 const login = async (username, password) => {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -77,6 +77,71 @@ const register = async (username, password, email, neighborhood, city, state, co
     throw new Error(`Registration failed: ${errorText}`);
 };
 
+const refreshToken = async () => {
+    try {
+        const refreshTokenValue = getRefreshToken();
+        if (!refreshTokenValue) {
+            throw new Error('No refresh token available');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken: refreshTokenValue }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Update tokens with new ones
+            setTokens(data.jwt, data.refreshToken);
+            return data.jwt; // Return new access token
+        }
+
+        // If refresh fails, user needs to login again
+        removeTokens();
+        throw new Error('Session expired. Please log in again.');
+    } catch (error) {
+        removeTokens();
+        throw error;
+    }
+};
+
+const makeAuthenticatedRequest = async (url, options = {}) => {
+    let token = getAccessToken();
+
+    // First attempt with current token
+    let response = await fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    // If 401/403, try to refresh token and retry
+    if (response.status === 401 || response.status === 403) {
+        try {
+            token = await refreshToken();
+            // Retry with new token
+            response = await fetch(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        } catch (refreshError) {
+            // Refresh failed, redirect to login
+            window.location.href = '/login';
+            throw refreshError;
+        }
+    }
+
+    return response;
+};
+
 
 // Export all functions for use in components
 export default {
@@ -87,5 +152,7 @@ export default {
     isAuthenticated,
     login,
     register,
+    refreshToken,
+    makeAuthenticatedRequest,
     API_BASE_URL,
 };

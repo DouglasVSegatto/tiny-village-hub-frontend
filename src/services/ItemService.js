@@ -1,3 +1,5 @@
+import AuthService from "./AuthService.js";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class ItemService {
@@ -18,12 +20,10 @@ class ItemService {
 
     async createItem(itemData) {
         try {
-            const token = localStorage.getItem('accessToken');
-            const response = await fetch(`${API_BASE_URL}/items`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(itemData)
             });
