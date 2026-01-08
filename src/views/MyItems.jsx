@@ -39,7 +39,8 @@ const MyItems = () => {
             name: item.name,
             description: item.description,
             type: item.type,
-            availabilityType: item.availabilityType
+            availabilityType: item.availabilityType,
+            status: item.status
         });
     };
 
@@ -62,6 +63,21 @@ const MyItems = () => {
             setEditingItem(null);
             fetchMyItems(); // Refresh the list
 
+        } catch (error) {
+            setMessage(error.message);
+            setIsError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStatusChange = async (itemId, newStatus) => {
+        try {
+            setLoading(true);
+            await ItemService.updateItemStatus(itemId, newStatus);
+            setMessage('Status updated successfully!');
+            setIsError(false);
+            fetchMyItems(); // Refresh the list
         } catch (error) {
             setMessage(error.message);
             setIsError(true);
@@ -284,9 +300,30 @@ const MyItems = () => {
                                             )}
                                         </td>
                                         <td>
-                                                <span className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>
-                                                    {item.status}
-                                                </span>
+                                            {editingItem?.id === item.id ? (
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={editingItem.status}
+                                                    onChange={(e) => updateEditingItem('status', e.target.value)}
+                                                >
+                                                    <option value="ACTIVE">Active</option>
+                                                    <option value="INACTIVE">Inactive</option>
+                                                    <option value="PENDING">Pending</option>
+                                                    <option value="COMPLETED">Completed</option>
+                                                </select>
+                                            ) : (
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={item.status}
+                                                    onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                                                    disabled={loading}
+                                                >
+                                                    <option value="ACTIVE">Active</option>
+                                                    <option value="INACTIVE">Inactive</option>
+                                                    <option value="PENDING">Pending</option>
+                                                    <option value="COMPLETED">Completed</option>
+                                                </select>
+                                            )}
                                         </td>
                                         <td>
                                             {editingItem?.id === item.id ? (

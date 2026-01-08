@@ -75,6 +75,27 @@ class ItemService {
         }
     }
 
+    async updateItemStatus(itemId, status) {
+        try {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/${itemId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating item status:', error);
+            throw new Error('Failed to update item status. Please try again.');
+        }
+    }
+
 }
 
 export default new ItemService();
