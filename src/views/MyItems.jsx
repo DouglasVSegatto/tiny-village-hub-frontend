@@ -13,6 +13,7 @@ const MyItems = () => {
     const [isError, setIsError] = useState(false);
     const [myItems, setMyItems] = useState([]);
     const [itemsLoading, setItemsLoading] = useState(true);
+    const [editingItem, setEditingItem] = useState(null);
     const navigate = useNavigate();
 
     // Fetch user's items on component load
@@ -30,6 +31,50 @@ const MyItems = () => {
         } finally {
             setItemsLoading(false);
         }
+    };
+
+    const handleEdit = (item) => {
+        setEditingItem({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            type: item.type,
+            availabilityType: item.availabilityType
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingItem(null);
+    };
+
+    const handleSaveEdit = async () => {
+        try {
+            setLoading(true);
+            await ItemService.updateItem(editingItem.id, {
+                name: editingItem.name,
+                description: editingItem.description,
+                type: editingItem.type,
+                availabilityType: editingItem.availabilityType
+            });
+
+            setMessage('Item updated successfully!');
+            setIsError(false);
+            setEditingItem(null);
+            fetchMyItems(); // Refresh the list
+
+        } catch (error) {
+            setMessage(error.message);
+            setIsError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateEditingItem = (field, value) => {
+        setEditingItem(prev => ({
+            ...prev,
+            [field]: value
+        }));
     };
 
     const handleSubmit = async (e) => {
@@ -155,7 +200,7 @@ const MyItems = () => {
                 </div>
             )}
 
-            {/* Items Table */}
+            {/* Items Table with inline editing */}
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title">Your Items</h5>
@@ -173,19 +218,101 @@ const MyItems = () => {
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Type</th>
+                                    <th>Availability</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {myItems.map(item => (
                                     <tr key={item.id}>
-                                        <td>{item.name}</td>
-                                        <td>{item.description}</td>
-                                        <td>{item.type}</td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-sm"
+                                                    value={editingItem.name}
+                                                    onChange={(e) => updateEditingItem('name', e.target.value)}
+                                                />
+                                            ) : (
+                                                item.name
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <textarea
+                                                    className="form-control form-control-sm"
+                                                    rows="2"
+                                                    value={editingItem.description}
+                                                    onChange={(e) => updateEditingItem('description', e.target.value)}
+                                                />
+                                            ) : (
+                                                item.description
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={editingItem.type}
+                                                    onChange={(e) => updateEditingItem('type', e.target.value)}
+                                                >
+                                                    <option value="BOOK">Book</option>
+                                                    <option value="ELECTRONICS">Electronics</option>
+                                                    <option value="CLOTHING">Clothing</option>
+                                                    <option value="TOY">Toy</option>
+                                                    <option value="FURNITURE">Furniture</option>
+                                                    <option value="OTHER">Other</option>
+                                                </select>
+                                            ) : (
+                                                item.type
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={editingItem.availabilityType}
+                                                    onChange={(e) => updateEditingItem('availabilityType', e.target.value)}
+                                                >
+                                                    <option value="TRADE">Trade</option>
+                                                    <option value="SHARE">Share</option>
+                                                    <option value="DONATION">Give Away/Donate</option>
+                                                </select>
+                                            ) : (
+                                                item.availabilityType || 'N/A'
+                                            )}
+                                        </td>
                                         <td>
                                                 <span className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>
                                                     {item.status}
                                                 </span>
+                                        </td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <div className="btn-group btn-group-sm">
+                                                    <button
+                                                        className="btn btn-success"
+                                                        onClick={handleSaveEdit}
+                                                        disabled={loading}
+                                                    >
+                                                        Save
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-secondary"
+                                                        onClick={handleCancelEdit}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className="btn btn-outline-primary btn-sm"
+                                                    onClick={() => handleEdit(item)}
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

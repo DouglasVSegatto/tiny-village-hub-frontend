@@ -54,6 +54,27 @@ class ItemService {
         }
     }
 
+    async updateItem(itemId, itemData) {
+        try {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/${itemId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(itemData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating item:', error);
+            throw new Error('Failed to update item. Please try again.');
+        }
+    }
+
 }
 
 export default new ItemService();
