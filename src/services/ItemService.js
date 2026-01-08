@@ -32,13 +32,12 @@ class ItemService {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            return { success: true };
         } catch (error) {
             console.error('Error creating item:', error);
             throw new Error('Failed to create item. Please try again.');
         }
     }
-
 }
 
 export default new ItemService();
