@@ -63,6 +63,7 @@ const Navigation = () => {
                             </a>
 
                             <ul className="dropdown-menu dropdown-menu-end text-small shadow">
+                                <li><Link className="dropdown-item" to="/my-items">My Items</Link></li>
                                 <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
                                 <li><hr className="dropdown-divider" /></li>
                                 <li>
