@@ -42,15 +42,15 @@ const login = async (username, password) => {
 
     if (response.ok) {
         const data = await response.json();
-        // The backend returns: { jwt, refreshToken, id, username }
-        setTokens(data.jwt, data.refreshToken);
+        // Backend returns: { accessToken, refreshToken, id, username }
+        setTokens(data.accessToken, data.refreshToken);
         localStorage.setItem('user', JSON.stringify({ id: data.id, username: data.username }));
         return data;
     }
 
-    // Throw an error to be caught by the component
     throw new Error('Login failed: Invalid credentials.');
 };
+
 
 const register = async (username, password, email, neighborhood, city, state, country) => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -94,12 +94,11 @@ const refreshToken = async () => {
 
         if (response.ok) {
             const data = await response.json();
-            // Update tokens with new ones
-            setTokens(data.jwt, data.refreshToken);
-            return data.jwt; // Return new access token
+            // Backend returns: { accessToken, refreshToken }
+            setTokens(data.accessToken, data.refreshToken);
+            return data.accessToken;
         }
 
-        // If refresh fails, user needs to login again
         removeTokens();
         throw new Error('Session expired. Please log in again.');
     } catch (error) {
@@ -107,6 +106,7 @@ const refreshToken = async () => {
         throw error;
     }
 };
+
 
 const makeAuthenticatedRequest = async (url, options = {}) => {
     let token = getAccessToken();
