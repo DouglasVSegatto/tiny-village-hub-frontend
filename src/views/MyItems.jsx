@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ItemService from '../services/ItemService';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,26 @@ const MyItems = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
     const [isError, setIsError] = useState(false);
+    const [myItems, setMyItems] = useState([]);
+    const [itemsLoading, setItemsLoading] = useState(true);
     const navigate = useNavigate();
+
+    // Fetch user's items on component load
+    useEffect(() => {
+        fetchMyItems();
+    }, []);
+
+    const fetchMyItems = async () => {
+        try {
+            setItemsLoading(true);
+            const items = await ItemService.getMyItems();
+            setMyItems(items);
+        } catch (error) {
+            console.error('Error fetching items:', error);
+        } finally {
+            setItemsLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,6 +53,9 @@ const MyItems = () => {
             setType('');
             setAvailabilityType('');
             setShowForm(false);
+
+            // Refresh the items list
+            fetchMyItems();
 
         } catch (error) {
             setMessage(error.message);
@@ -132,9 +154,45 @@ const MyItems = () => {
                 </div>
             )}
 
-            {/* TODO: List user's items here */}
-            <div className="alert alert-info">
-                Your items will be displayed here once you create some!
+            {/* Items Table */}
+            <div className="card">
+                <div className="card-body">
+                    <h5 className="card-title">Your Items</h5>
+                    {itemsLoading ? (
+                        <div className="text-center">Loading your items...</div>
+                    ) : myItems.length === 0 ? (
+                        <div className="alert alert-info">
+                            You haven't created any items yet. Click "Add New Item" to get started!
+                        </div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {myItems.map(item => (
+                                    <tr key={item.id}>
+                                        <td>{item.name}</td>
+                                        <td>{item.description}</td>
+                                        <td>{item.type}</td>
+                                        <td>
+                                                <span className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>
+                                                    {item.status}
+                                                </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

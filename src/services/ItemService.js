@@ -38,6 +38,22 @@ class ItemService {
             throw new Error('Failed to create item. Please try again.');
         }
     }
+
+    async getMyItems() {
+        try {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/my-items`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching my items:', error);
+            throw new Error('Failed to fetch your items. Please try again.');
+        }
+    }
+
 }
 
 export default new ItemService();
