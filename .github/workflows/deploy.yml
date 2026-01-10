@@ -24,3 +24,4 @@ jobs:
 
           # Rebuild and restart only the frontend-app service
           docker compose up -d --build frontend-app
+
