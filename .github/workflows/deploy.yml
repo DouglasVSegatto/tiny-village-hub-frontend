@@ -7,28 +7,20 @@ on:
 
 jobs:
   deploy:
-    # CRITICAL: This ensures ONLY the frontend-runner handles this job
+    # Keep your specific runner label
     runs-on: frontend-runner
-    
-    env:
-      # The fixed, persistent location of your Docker Compose environment
-      TARGET_DIR: /home/ghrunner/tiny-village-hub
 
     steps:
       - name: 1. Checkout Frontend Code
         uses: actions/checkout@v4
+        with:
+          # This ensures the code lands exactly in the folder Dockge is watching
+          path: tiny-village-hub-frontend
 
-      - name: 2. Copy Code to Deployment Directory
-        # Copy the fresh frontend-repo code from the runner's workspace
-        # into the correct location within the shared deployment folder.
+      - name: 2. Deploy Frontend Service Only
         run: |
-          echo "Copying fresh frontend code to: ${{ env.TARGET_DIR }}/frontend-repo"
-          rsync -av --exclude '.git' --delete $GITHUB_WORKSPACE/ ${{ env.TARGET_DIR }}/frontend-repo/
+          # Navigate to the NEW persistent stack folder
+          cd /opt/stacks/web-project
 
-      - name: 3. Deploy Frontend Service Only
-        # Navigate to the root where docker-compose.yml lives
-        run: |
-          cd ${{ env.TARGET_DIR }}
-          echo "Executing: docker compose up -d --build frontend-app"
-          # This command rebuilds *only* the frontend-app image and restarts its container
+          # Rebuild and restart only the frontend-app service
           docker compose up -d --build frontend-app
