@@ -20,7 +20,7 @@ class ItemService {
 
     async createItem(itemData) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/temp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
