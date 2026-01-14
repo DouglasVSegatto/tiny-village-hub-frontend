@@ -7,21 +7,12 @@ on:
 
 jobs:
   deploy:
-    # Keep your specific runner label
-    runs-on: frontend-runner
+    runs-on: frontend
 
     steps:
-      - name: 1. Checkout Frontend Code
-        uses: actions/checkout@v4
-        with:
-          # This ensures the code lands exactly in the folder Dockge is watching
-          path: tiny-village-hub-frontend
+      - uses: actions/checkout@v4
 
-      - name: 2. Deploy Frontend Service Only
+      - name: Build & deploy frontend
         run: |
-          # Navigate to the NEW persistent stack folder
-          cd /opt/stacks/web-project
-
-          # Rebuild and restart only the frontend-app service
+          cd /home/popcornpalace/deployment/stacks/web-project
           docker compose up -d --build --no-deps frontend-app
-
