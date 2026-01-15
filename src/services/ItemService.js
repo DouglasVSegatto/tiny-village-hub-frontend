@@ -1,13 +1,12 @@
 import AuthService from "./AuthService.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const USE_TEMP_ENDPOINT = true; // Set to false to use original endpoints
-const ENDPOINT_PREFIX = USE_TEMP_ENDPOINT ? '/items/temp' : '/items';
+const ITEMS_ENDPOINT = '/items';
 
 class ItemService {
     async getAvailableItems() {
         try {
-            const response = await fetch(`${API_BASE_URL}${ENDPOINT_PREFIX}/available`);
+            const response = await fetch(`${API_BASE_URL}${ITEMS_ENDPOINT}/available`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -22,7 +21,7 @@ class ItemService {
 
     async createItem(itemData) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +42,7 @@ class ItemService {
 
     async getMyItems() {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/my-items`);
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/my-items`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -58,7 +57,7 @@ class ItemService {
 
     async updateItem(itemId, itemData) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,7 +78,7 @@ class ItemService {
 
     async updateItemStatus(itemId, status) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}/status`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
