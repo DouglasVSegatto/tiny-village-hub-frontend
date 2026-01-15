@@ -15,6 +15,9 @@ const MyItems = () => {
     const [itemsLoading, setItemsLoading] = useState(true);
     const [editingItem, setEditingItem] = useState(null);
     const navigate = useNavigate();
+    const [condition, setCondition] = useState('');
+    const [status, setStatus] = useState('');
+
 
     // Fetch user's items on component load
     useEffect(() => {
@@ -103,7 +106,9 @@ const MyItems = () => {
                 name,
                 description,
                 type,
-                availabilityType
+                availabilityType,
+                condition,
+                status
             });
 
             setMessage('Item created successfully!');
@@ -113,6 +118,8 @@ const MyItems = () => {
             setDescription('');
             setType('');
             setAvailabilityType('');
+            setCondition('');
+            setStatus('');
             setShowForm(false);
 
             // Refresh the items list
@@ -199,11 +206,38 @@ const MyItems = () => {
                                 >
                                     <option value="">Select availability...</option>
                                     <option value="TRADE">Trade</option>
-                                    <option value="SHARE">Share</option>
                                     <option value="DONATION">Give Away/Donate</option>
                                 </select>
                             </div>
-
+                            <div className="mb-3">
+                                <label className="form-label">Condition:</label>
+                                <select
+                                    className="form-select"
+                                    value={condition}
+                                    onChange={(e) => setCondition(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Select condition...</option>
+                                    <option value="NEW">New</option>
+                                    <option value="LIKE_NEW">Like New</option>
+                                    <option value="GOOD">Good</option>
+                                    <option value="FAIR">Fair</option>
+                                    <option value="POOR">Poor</option>
+                                </select>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Status:</label>
+                                <select
+                                    className="form-select"
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Select status...</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Inactive</option>
+                                </select>
+                            </div>
                             <button
                                 type="submit"
                                 className="btn btn-success"
@@ -274,10 +308,8 @@ const MyItems = () => {
                                                     onChange={(e) => updateEditingItem('type', e.target.value)}
                                                 >
                                                     <option value="BOOK">Book</option>
-                                                    <option value="ELECTRONICS">Electronics</option>
                                                     <option value="CLOTHING">Clothing</option>
                                                     <option value="TOY">Toy</option>
-                                                    <option value="FURNITURE">Furniture</option>
                                                     <option value="OTHER">Other</option>
                                                 </select>
                                             ) : (
