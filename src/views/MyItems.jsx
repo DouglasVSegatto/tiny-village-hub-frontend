@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import ItemService from '../services/ItemService';
-import Navigation from '../components/Navigation';
 
 const MyItems = () => {
     const [showForm, setShowForm] = useState(false);
@@ -134,8 +133,6 @@ const MyItems = () => {
     };
 
     return (
-        <>
-            <Navigation />
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>My Items</h2>
@@ -421,7 +418,6 @@ const MyItems = () => {
                 </div>
             </div>
         </div>
-        </>
     );
 };
 

@@ -1,7 +1,6 @@
 // src/views/ItemListView.jsx
 import React, { useState, useEffect } from 'react';
 import ItemService from '../services/ItemService';
-import Navigation from '../components/Navigation';
 
 const ItemListView = () => {
     const [items, setItems] = useState([]);
@@ -28,9 +27,7 @@ const ItemListView = () => {
     if (error) return <div className="container mt-4"><div className="alert alert-danger">{error}</div></div>;
 
     return (
-        <>
-            <Navigation />
-            <div className="container mt-4">
+        <div className="container mt-4">
             <h2>Available Items</h2>
 
             {items.length === 0 ? (
@@ -69,7 +66,6 @@ const ItemListView = () => {
                 </div>
             )}
             </div>
-        </>
     );
 };
 
