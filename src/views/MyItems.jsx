@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ItemService from '../services/ItemService';
-import { useNavigate } from 'react-router-dom';
+import Navigation from '../components/Navigation';
 
 const MyItems = () => {
     const [showForm, setShowForm] = useState(false);
@@ -14,10 +14,8 @@ const MyItems = () => {
     const [myItems, setMyItems] = useState([]);
     const [itemsLoading, setItemsLoading] = useState(true);
     const [editingItem, setEditingItem] = useState(null);
-    const navigate = useNavigate();
     const [condition, setCondition] = useState('');
     const [status, setStatus] = useState('');
-
 
     // Fetch user's items on component load
     useEffect(() => {
@@ -43,6 +41,7 @@ const MyItems = () => {
             description: item.description,
             type: item.type,
             availabilityType: item.availabilityType,
+            condition: item.condition,
             status: item.status
         });
     };
@@ -58,7 +57,8 @@ const MyItems = () => {
                 name: editingItem.name,
                 description: editingItem.description,
                 type: editingItem.type,
-                availabilityType: editingItem.availabilityType
+                availabilityType: editingItem.availabilityType,
+                condition: editingItem.condition
             });
 
             setMessage('Item updated successfully!');
@@ -134,6 +134,8 @@ const MyItems = () => {
     };
 
     return (
+        <>
+            <Navigation />
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>My Items</h2>
@@ -188,10 +190,8 @@ const MyItems = () => {
                                 >
                                     <option value="">Select type...</option>
                                     <option value="BOOK">Book</option>
-                                    <option value="ELECTRONICS">Electronics</option>
                                     <option value="CLOTHING">Clothing</option>
                                     <option value="TOY">Toy</option>
-                                    <option value="FURNITURE">Furniture</option>
                                     <option value="OTHER">Other</option>
                                 </select>
                             </div>
@@ -265,17 +265,27 @@ const MyItems = () => {
                             <table className="table table-striped">
                                 <thead>
                                 <tr>
+                                    <th>Image</th>
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Type</th>
                                     <th>Availability</th>
+                                    <th>Condition</th>
                                     <th>Status</th>
+                                    <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {myItems.map(item => (
                                     <tr key={item.id}>
+                                        <td>
+                                            {item.imageUrls && item.imageUrls.length > 0 ? (
+                                                <img src={item.imageUrls[0]} alt={item.name} style={{width: '50px', height: '50px', objectFit: 'cover'}} />
+                                            ) : (
+                                                <small className="text-muted">No image</small>
+                                            )}
+                                        </td>
                                         <td>
                                             {editingItem?.id === item.id ? (
                                                 <input
@@ -324,11 +334,27 @@ const MyItems = () => {
                                                     onChange={(e) => updateEditingItem('availabilityType', e.target.value)}
                                                 >
                                                     <option value="TRADE">Trade</option>
-                                                    <option value="SHARE">Share</option>
                                                     <option value="DONATION">Give Away/Donate</option>
                                                 </select>
                                             ) : (
                                                 item.availabilityType || 'N/A'
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingItem?.id === item.id ? (
+                                                <select
+                                                    className="form-select form-select-sm"
+                                                    value={editingItem.condition}
+                                                    onChange={(e) => updateEditingItem('condition', e.target.value)}
+                                                >
+                                                    <option value="NEW">New</option>
+                                                    <option value="LIKE_NEW">Like New</option>
+                                                    <option value="GOOD">Good</option>
+                                                    <option value="FAIR">Fair</option>
+                                                    <option value="POOR">Poor</option>
+                                                </select>
+                                            ) : (
+                                                item.condition || 'N/A'
                                             )}
                                         </td>
                                         <td>
@@ -356,6 +382,9 @@ const MyItems = () => {
                                                     <option value="COMPLETED">Completed</option>
                                                 </select>
                                             )}
+                                        </td>
+                                        <td>
+                                            <small>{new Date(item.createdAt).toLocaleDateString()}</small>
                                         </td>
                                         <td>
                                             {editingItem?.id === item.id ? (
@@ -392,6 +421,7 @@ const MyItems = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

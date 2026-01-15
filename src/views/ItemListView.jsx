@@ -1,6 +1,7 @@
 // src/views/ItemListView.jsx
 import React, { useState, useEffect } from 'react';
 import ItemService from '../services/ItemService';
+import Navigation from '../components/Navigation';
 
 const ItemListView = () => {
     const [items, setItems] = useState([]);
@@ -27,7 +28,9 @@ const ItemListView = () => {
     if (error) return <div className="container mt-4"><div className="alert alert-danger">{error}</div></div>;
 
     return (
-        <div className="container mt-4">
+        <>
+            <Navigation />
+            <div className="container mt-4">
             <h2>Available Items</h2>
 
             {items.length === 0 ? (
@@ -38,23 +41,35 @@ const ItemListView = () => {
                         <div key={item.id} className="col-md-4 mb-3">
                             <div className="card">
                                 <div className="card-body">
+                                    {item.imageUrls && item.imageUrls.length > 0 && (
+                                        <img src={item.imageUrls[0]} alt={item.name} className="img-fluid mb-2" style={{maxHeight: '200px', objectFit: 'cover', width: '100%'}} />
+                                    )}
                                     <h5 className="card-title">{item.name}</h5>
                                     <p className="card-text">{item.description}</p>
-                                    <p className="card-text">
-                                        <small className="text-muted">
-                                            Type: {item.type} | Owner: {item.ownerUsername}
-                                        </small>
-                                    </p>
-                                    <span className={`badge ${item.status === 'AVAILABLE' ? 'bg-success' : 'bg-secondary'}`}>
-                                        {item.status}
-                                    </span>
+                                    <div className="mb-2">
+                                        <span className={`badge me-1 ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-warning'}`}>
+                                            {item.status}
+                                        </span>
+                                        <span className={`badge me-1 ${item.availabilityType === 'TRADE' ? 'bg-primary' : 'bg-info'}`}>
+                                            {item.availabilityType}
+                                        </span>
+                                        <span className="badge bg-secondary">{item.condition}</span>
+                                    </div>
+                                    <div className="mb-2">
+                                        <small className="text-muted d-block">Type: {item.type}</small>
+                                        <small className="text-muted d-block">Owner: {item.ownerUsername}</small>
+                                        <small className="text-muted d-block">Location: {item.ownerNeighbourhood}, {item.ownerCity}, {item.ownerState}</small>
+                                        <small className="text-muted d-block">Posted: {new Date(item.createdAt).toLocaleDateString()}</small>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                     ))}
                 </div>
             )}
-        </div>
+            </div>
+        </>
     );
 };
 

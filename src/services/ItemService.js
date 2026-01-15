@@ -78,12 +78,11 @@ class ItemService {
 
     async updateItemStatus(itemId, status) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/status`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/status?status=${status}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status })
+                }
             });
 
             if (!response.ok) {
