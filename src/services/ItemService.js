@@ -1,11 +1,13 @@
 import AuthService from "./AuthService.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const USE_TEMP_ENDPOINT = true; // Set to false to use original endpoints
+const ENDPOINT_PREFIX = USE_TEMP_ENDPOINT ? '/items/temp' : '/items';
 
 class ItemService {
     async getAvailableItems() {
         try {
-            const response = await fetch(`${API_BASE_URL}/items/available`);
+            const response = await fetch(`${API_BASE_URL}${ENDPOINT_PREFIX}/available`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -20,7 +22,7 @@ class ItemService {
 
     async createItem(itemData) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/temp`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,7 +43,7 @@ class ItemService {
 
     async getMyItems() {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/my-items`);
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/my-items`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -56,7 +58,7 @@ class ItemService {
 
     async updateItem(itemId, itemData) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/${itemId}`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +79,7 @@ class ItemService {
 
     async updateItemStatus(itemId, status) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}/items/${itemId}/status`, {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
