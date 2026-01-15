@@ -59,7 +59,7 @@ class ItemService {
     async updateItem(itemId, itemData) {
         try {
             const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -80,7 +80,7 @@ class ItemService {
     async updateItemStatus(itemId, status) {
         try {
             const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ENDPOINT_PREFIX}/${itemId}/status`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
