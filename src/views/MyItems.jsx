@@ -356,16 +356,7 @@ const MyItems = () => {
                                         </td>
                                         <td>
                                             {editingItem?.id === item.id ? (
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={editingItem.status}
-                                                    onChange={(e) => updateEditingItem('status', e.target.value)}
-                                                >
-                                                    <option value="ACTIVE">Active</option>
-                                                    <option value="INACTIVE">Inactive</option>
-                                                    <option value="PENDING">Pending</option>
-                                                    <option value="COMPLETED">Completed</option>
-                                                </select>
+                                                <span className="badge bg-secondary">{editingItem.status}</span>
                                             ) : (
                                                 <select
                                                     className="form-select form-select-sm"
