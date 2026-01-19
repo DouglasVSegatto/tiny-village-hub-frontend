@@ -17,6 +17,7 @@ const MyItems = () => {
 
 
     const [editingItem, setEditingItem] = useState(null);
+    const [originalItem, setOriginalItem] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
     const [isError, setIsError] = useState(false);
@@ -101,12 +102,43 @@ const MyItems = () => {
 
     const handleEdit = (item) => {
         setEditingItem({ ...item });
+        setOriginalItem({ ...item });
         setShowForm(false); // Close create form if open
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCancelEdit = () => {
         setEditingItem(null);
+        setOriginalItem(null);
+    };
+
+    const hasChanges = () => {
+        if (!editingItem || !originalItem) return false;
+        return editingItem.name !== originalItem.name ||
+               editingItem.description !== originalItem.description ||
+               editingItem.type !== originalItem.type ||
+               editingItem.availabilityType !== originalItem.availabilityType ||
+               editingItem.condition !== originalItem.condition ||
+               editingItem.status !== originalItem.status;
+    };
+
+    const handleDeleteItem = async (itemId) => {
+        if (!window.confirm("Are you sure you want to delete this item? This action cannot be undone.")) return;
+
+        try {
+            setLoading(true);
+            await ItemService.deleteItem(itemId);
+            setMessage('Item deleted successfully!');
+            setIsError(false);
+            setEditingItem(null);
+            setOriginalItem(null);
+            fetchMyItems();
+        } catch (error) {
+            setMessage(error.message);
+            setIsError(true);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSaveEdit = async () => {
@@ -297,7 +329,7 @@ const MyItems = () => {
                             </button>
                             <div className="d-flex gap-2">
                                 <button className="btn btn-secondary" onClick={handleCancelEdit}>Discard Changes</button>
-                                <button className="btn btn-success px-4" onClick={handleSaveEdit} disabled={loading}>
+                                <button className="btn btn-success px-4" onClick={handleSaveEdit} disabled={loading || !hasChanges()}>
                                     {loading ? 'Saving...' : 'Save All Details'}
                                 </button>
                             </div>

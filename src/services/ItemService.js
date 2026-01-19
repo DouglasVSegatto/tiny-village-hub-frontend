@@ -96,6 +96,23 @@ class ItemService {
         }
     }
 
+    async deleteItem(itemId) {
+        try {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            throw new Error('Failed to delete item. Please try again.');
+        }
+    }
+
 }
 
 export default new ItemService();
