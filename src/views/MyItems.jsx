@@ -308,41 +308,70 @@ const MyItems = () => {
 
             {/* --- SECTION: CREATE NEW ITEM --- */}
             {showForm && (
-                <div className="card mb-4 shadow-sm border-success">
-                    <div className="card-header bg-success text-white"><h5>Create New Listing</h5></div>
+                <div className="card mb-4 border-success shadow-sm">
+                    <div className="card-header bg-success text-white">
+                        <h5 className="mb-0">Create New Item</h5>
+                    </div>
                     <div className="card-body">
-                        <form onSubmit={handleSubmitCreate}>
-                            <div className="row g-3">
-                                <div className="col-md-6">
-                                    <label className="form-label">Name</label>
-                                    <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
-                                </div>
-                                <div className="col-md-3">
-                                    <label className="form-label">Type</label>
-                                    <select className="form-select" value={type} onChange={(e) => setType(e.target.value)} required>
-                                        <option value="">Choose...</option>
-                                        <option value="BOOK">Book</option>
-                                        <option value="CLOTHING">Clothing</option>
-                                        <option value="TOY">Toy</option>
-                                        <option value="OTHER">Other</option>
-                                    </select>
-                                </div>
-                                <div className="col-md-3">
-                                    <label className="form-label">Condition</label>
-                                    <select className="form-select" value={condition} onChange={(e) => setCondition(e.target.value)} required>
-                                        <option value="">Choose...</option>
-                                        <option value="NEW">Brand New</option>
-                                        <option value="LIKE_NEW">Like New</option>
-                                        <option value="GOOD">Good Condition</option>
-                                        <option value="FAIR">Fair Condition</option>
-                                        <option value="POOR">Needs Repair</option>
-                                    </select>
-                                </div>
-                                <div className="col-12 text-end">
-                                    <button type="submit" className="btn btn-success px-5" disabled={loading}>Create Item</button>
-                                </div>
+                        <div className="row g-3">
+                            {/* Row 1: Name and Type */}
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Item Name</label>
+                                <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
                             </div>
-                        </form>
+                            <div className="col-md-3">
+                                <label className="form-label fw-bold">Type</label>
+                                <select className="form-select" value={type} onChange={(e) => setType(e.target.value)} required>
+                                    <option value="">Choose...</option>
+                                    <option value="BOOK">Book</option>
+                                    <option value="CLOTHING">Clothing</option>
+                                    <option value="TOY">Toy</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            <div className="col-md-3">
+                                <label className="form-label fw-bold">Status</label>
+                                <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)} required>
+                                    <option value="">Choose...</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Hidden</option>
+                                </select>
+                            </div>
+
+                            {/* Row 2: Condition and Availability */}
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Condition</label>
+                                <select className="form-select" value={condition} onChange={(e) => setCondition(e.target.value)} required>
+                                    <option value="">Choose...</option>
+                                    <option value="NEW">Brand New</option>
+                                    <option value="LIKE_NEW">Like New</option>
+                                    <option value="GOOD">Good Condition</option>
+                                    <option value="FAIR">Fair Condition</option>
+                                    <option value="POOR">Needs Repair</option>
+                                </select>
+                            </div>
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Availability</label>
+                                <select className="form-select" value={availabilityType} onChange={(e) => setAvailabilityType(e.target.value)} required>
+                                    <option value="">Choose...</option>
+                                    <option value="TRADE">Trade</option>
+                                    <option value="DONATION">Give Away/Donate</option>
+                                </select>
+                            </div>
+
+                            {/* Row 3: Description */}
+                            <div className="col-12">
+                                <label className="form-label fw-bold">Description</label>
+                                <textarea className="form-control" rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 d-flex justify-content-end gap-2">
+                            <button className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                            <button className="btn btn-success px-4" onClick={handleSubmitCreate} disabled={loading}>
+                                {loading ? 'Creating...' : 'Create Item'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
