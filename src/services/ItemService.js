@@ -113,6 +113,44 @@ class ItemService {
         }
     }
 
+    async uploadImage(itemId, file) {
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/images`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            throw new Error('Failed to upload image. Please try again.');
+        }
+    }
+
+    async deleteImage(itemId, index) {
+        try {
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/images/${index}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            throw new Error('Failed to delete image. Please try again.');
+        }
+    }
+
 }
 
 export default new ItemService();
