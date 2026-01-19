@@ -1,25 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ItemService from '../services/ItemService';
+import { fakeItems } from '../temp/fakeItemsData'; // Adjust path if needed
 
 const MyItems = () => {
+    // Form States
     const [showForm, setShowForm] = useState(false);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [type, setType] = useState('');
     const [availabilityType, setAvailabilityType] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
-    const [isError, setIsError] = useState(false);
-    const [myItems, setMyItems] = useState([]);
-    const [itemsLoading, setItemsLoading] = useState(true);
-    const [editingItem, setEditingItem] = useState(null);
     const [condition, setCondition] = useState('');
     const [status, setStatus] = useState('');
 
-    // Fetch user's items on component load
-    useEffect(() => {
-        fetchMyItems();
-    }, []);
+    //TEST LIST & LOADING STATES
+    // const [myItems, setMyItems] = useState(fakeItems);
+    // const [itemsLoading, setItemsLoading] = useState(false);
+
+    // List & Loading States
+    const [myItems, setMyItems] = useState([]);
+    const [itemsLoading, setItemsLoading] = useState(true);
+
+
+    const [editingItem, setEditingItem] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState(null);
+    const [isError, setIsError] = useState(false);
+
+    // File Input Ref
+    const fileInputRef = useRef(null);
+
+    // useEffect(() => {
+    //     fetchMyItems();
+    // }, []);
 
     const fetchMyItems = async () => {
         try {
@@ -33,16 +45,69 @@ const MyItems = () => {
         }
     };
 
+    // --- IMAGE ACTION HANDLERS ---
+
+    const handleUploadClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const onFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !editingItem) return;
+
+        try {
+            setLoading(true);
+            // Sending to your @PostMapping endpoint
+            await ItemService.uploadImage(editingItem.id, file);
+
+            setMessage('Image uploaded successfully!');
+            setIsError(false);
+
+            // Refresh data to show new image
+            await refreshEditingItem(editingItem.id);
+        } catch (error) {
+            setMessage(error.message);
+            setIsError(true);
+        } finally {
+            setLoading(false);
+            e.target.value = null; // Clear input
+        }
+    };
+
+    const handleDeleteImage = async (index) => {
+        if (!window.confirm("Are you sure you want to remove this image?")) return;
+
+        try {
+            setLoading(true);
+            // Sending to your @DeleteMapping("/{index}") endpoint
+            await ItemService.deleteImage(editingItem.id, index);
+
+            setMessage('Image removed.');
+            setIsError(false);
+
+            await refreshEditingItem(editingItem.id);
+        } catch (error) {
+            setMessage(error.message);
+            setIsError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Helper to sync state after image changes
+    const refreshEditingItem = async (id) => {
+        const items = await ItemService.getMyItems();
+        setMyItems(items);
+        const updated = items.find(i => i.id === id);
+        setEditingItem(updated);
+    };
+
+    // --- ITEM DATA HANDLERS ---
+
     const handleEdit = (item) => {
-        setEditingItem({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            type: item.type,
-            availabilityType: item.availabilityType,
-            condition: item.condition,
-            status: item.status
-        });
+        setEditingItem({ ...item });
+        setShowForm(false); // Close create form if open
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCancelEdit = () => {
@@ -57,29 +122,14 @@ const MyItems = () => {
                 description: editingItem.description,
                 type: editingItem.type,
                 availabilityType: editingItem.availabilityType,
-                condition: editingItem.condition
+                condition: editingItem.condition,
+                status: editingItem.status
             });
 
-            setMessage('Item updated successfully!');
+            setMessage('Item details updated!');
             setIsError(false);
             setEditingItem(null);
-            fetchMyItems(); // Refresh the list
-
-        } catch (error) {
-            setMessage(error.message);
-            setIsError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleStatusChange = async (itemId, newStatus) => {
-        try {
-            setLoading(true);
-            await ItemService.updateItemStatus(itemId, newStatus);
-            setMessage('Status updated successfully!');
-            setIsError(false);
-            fetchMyItems(); // Refresh the list
+            fetchMyItems();
         } catch (error) {
             setMessage(error.message);
             setIsError(true);
@@ -89,41 +139,19 @@ const MyItems = () => {
     };
 
     const updateEditingItem = (field, value) => {
-        setEditingItem(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        setEditingItem(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmitCreate = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setMessage(null);
-
         try {
-            await ItemService.createItem({
-                name,
-                description,
-                type,
-                availabilityType,
-                condition,
-                status
-            });
-
-            setMessage('Item created successfully!');
+            await ItemService.createItem({ name, description, type, availabilityType, condition, status });
+            setMessage('Item created! Now you can edit it to add pictures.');
             setIsError(false);
-            // Reset form
-            setName('');
-            setDescription('');
-            setType('');
-            setAvailabilityType('');
-            setCondition('');
-            setStatus('');
+            setName(''); setDescription(''); setType(''); setAvailabilityType(''); setCondition(''); setStatus('');
             setShowForm(false);
-
-            // Refresh the items list
             fetchMyItems();
-
         } catch (error) {
             setMessage(error.message);
             setIsError(true);
@@ -133,272 +161,231 @@ const MyItems = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container mt-4 mb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>My Items</h2>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => setShowForm(!showForm)}
-                >
-                    {showForm ? 'Cancel' : 'Add New Item'}
+                <h2 className="fw-bold">Inventory Management</h2>
+                <button className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'}`} onClick={() => { setShowForm(!showForm); setEditingItem(null); }}>
+                    {showForm ? 'Cancel' : '+ Add New Item'}
                 </button>
             </div>
 
             {message && (
-                <div className={`alert ${isError ? 'alert-danger' : 'alert-success'}`}>
+                <div className={`alert alert-dismissible fade show ${isError ? 'alert-danger' : 'alert-success'}`} role="alert">
                     {message}
+                    <button type="button" className="btn-close" onClick={() => setMessage(null)}></button>
                 </div>
             )}
 
-            {showForm && (
-                <div className="card mb-4">
+            {/* --- SECTION: EDIT ITEM (With Image Manager) --- */}
+            {editingItem && (
+                <div className="card mb-4 border-primary shadow-sm">
+                    <div className="card-header bg-primary text-white">
+                        <h5 className="mb-0">Edit Item & Photos</h5>
+                    </div>
                     <div className="card-body">
-                        <h5 className="card-title">Create New Item</h5>
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label className="form-label">Name:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                />
-                            </div>
+                        <label className="form-label fw-bold mb-3">Item Gallery (Max 5 Pictures)</label>
+                        <div className="d-flex gap-3 mb-4 overflow-auto pb-2">
+                            {[0, 1, 2, 3, 4].map((index) => {
+                                const url = editingItem.imageUrls && editingItem.imageUrls[index];
+                                const isNextAvailableSlot = index === (editingItem.imageUrls ? editingItem.imageUrls.length : 0);
 
-                            <div className="mb-3">
-                                <label className="form-label">Description:</label>
-                                <textarea
-                                    className="form-control"
-                                    rows="3"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    required
-                                />
-                            </div>
+                                return (
+                                    <div
+                                        key={index}
+                                        className="position-relative border rounded bg-light shadow-sm"
+                                        style={{ width: '120px', height: '120px', flexShrink: 0, overflow: 'hidden' }}
+                                    >
+                                        {url ? (
+                                            <>
+                                                <img
+                                                    src={url}
+                                                    alt={`Attachment ${index + 1}`}
+                                                    className="w-100 h-100"
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                                {/* The Red X Button */}
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-1 shadow rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                    onClick={() => handleDeleteImage(index)}
+                                                    title="Remove Image"
+                                                    style={{
+                                                        width: '22px',
+                                                        height: '22px',
+                                                        backgroundColor: 'white', // White background so the X is visible over dark photos
+                                                        borderWidth: '2px'
+                                                    }}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        ) : isNextAvailableSlot ? (
+                                            <button
+                                                className="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center border-2 border-dashed"
+                                                onClick={handleUploadClick}
+                                            >
+                                                <span className="fs-2 fw-light">+</span>
+                                                <small style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }}>Add Photo</small>
+                                            </button>
+                                        ) : (
+                                            <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted opacity-50">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                                                    <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8zM1 5v8.001c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1z"/>
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                            <div className="mb-3">
-                                <label className="form-label">Type:</label>
-                                <select
-                                    className="form-select"
-                                    value={type}
-                                    onChange={(e) => setType(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Select type...</option>
+                        {/* Hidden File Input */}
+                        <input type="file" ref={fileInputRef} className="d-none" onChange={onFileChange} accept="image/*" />
+
+                        <div className="row g-3">
+                            {/* Row 1: Name and Type */}
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Item Name</label>
+                                <input type="text" className="form-control" value={editingItem.name} onChange={(e) => updateEditingItem('name', e.target.value)} />
+                            </div>
+                            <div className="col-md-3">
+                                <label className="form-label fw-bold">Type</label>
+                                <select className="form-select" value={editingItem.type} onChange={(e) => updateEditingItem('type', e.target.value)}>
                                     <option value="BOOK">Book</option>
                                     <option value="CLOTHING">Clothing</option>
                                     <option value="TOY">Toy</option>
                                     <option value="OTHER">Other</option>
                                 </select>
                             </div>
+                            <div className="col-md-3">
+                                <label className="form-label fw-bold">Status</label>
+                                <select className="form-select" value={editingItem.status} onChange={(e) => updateEditingItem('status', e.target.value)}>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Hidden</option>
+                                    <option value="PENDING">In Discussion</option>
+                                    <option value="COMPLETED">Completed</option>
+                                </select>
+                            </div>
 
-                            <div className="mb-3">
-                                <label className="form-label">Availability:</label>
-                                <select
-                                    className="form-select"
-                                    value={availabilityType}
-                                    onChange={(e) => setAvailabilityType(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Select availability...</option>
+                            {/* Row 2: Condition and Availability (The Missing Parts) */}
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Condition</label>
+                                <select className="form-select" value={editingItem.condition} onChange={(e) => updateEditingItem('condition', e.target.value)}>
+                                    <option value="NEW">Brand New</option>
+                                    <option value="LIKE_NEW">Like New</option>
+                                    <option value="GOOD">Good Condition</option>
+                                    <option value="FAIR">Fair Condition</option>
+                                    <option value="POOR">Needs Repair</option>
+                                </select>
+                            </div>
+                            <div className="col-md-6">
+                                <label className="form-label fw-bold">Availability</label>
+                                <select className="form-select" value={editingItem.availabilityType} onChange={(e) => updateEditingItem('availabilityType', e.target.value)}>
                                     <option value="TRADE">Trade</option>
                                     <option value="DONATION">Give Away/Donate</option>
+                                    <option value="SHARE">Share</option>
                                 </select>
                             </div>
-                            <div className="mb-3">
-                                <label className="form-label">Condition:</label>
-                                <select
-                                    className="form-select"
-                                    value={condition}
-                                    onChange={(e) => setCondition(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Select condition...</option>
-                                    <option value="NEW">New</option>
-                                    <option value="LIKE_NEW">Like New</option>
-                                    <option value="GOOD">Good</option>
-                                    <option value="FAIR">Fair</option>
-                                    <option value="POOR">Poor</option>
-                                </select>
+
+                            {/* Row 3: Description */}
+                            <div className="col-12">
+                                <label className="form-label fw-bold">Description</label>
+                                <textarea className="form-control" rows="3" value={editingItem.description} onChange={(e) => updateEditingItem('description', e.target.value)}></textarea>
                             </div>
-                            <div className="mb-3">
-                                <label className="form-label">Status:</label>
-                                <select
-                                    className="form-select"
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Select status...</option>
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="INACTIVE">Inactive</option>
-                                </select>
-                            </div>
-                            <button
-                                type="submit"
-                                className="btn btn-success"
-                                disabled={loading}
-                            >
-                                {loading ? 'Creating...' : 'Create Item'}
+                        </div>
+
+                        <div className="mt-4 d-flex justify-content-between">
+                            <button className="btn btn-outline-danger" onClick={() => handleDeleteItem(editingItem.id)}>
+                                🗑️ Delete Item
                             </button>
+                            <div className="d-flex gap-2">
+                                <button className="btn btn-secondary" onClick={handleCancelEdit}>Discard Changes</button>
+                                <button className="btn btn-success px-4" onClick={handleSaveEdit} disabled={loading}>
+                                    {loading ? 'Saving...' : 'Save All Details'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- SECTION: CREATE NEW ITEM --- */}
+            {showForm && (
+                <div className="card mb-4 shadow-sm border-success">
+                    <div className="card-header bg-success text-white"><h5>Create New Listing</h5></div>
+                    <div className="card-body">
+                        <form onSubmit={handleSubmitCreate}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label">Name</label>
+                                    <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
+                                </div>
+                                <div className="col-md-3">
+                                    <label className="form-label">Type</label>
+                                    <select className="form-select" value={type} onChange={(e) => setType(e.target.value)} required>
+                                        <option value="">Choose...</option>
+                                        <option value="BOOK">Book</option>
+                                        <option value="CLOTHING">Clothing</option>
+                                        <option value="TOY">Toy</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-3">
+                                    <label className="form-label">Condition</label>
+                                    <select className="form-select" value={condition} onChange={(e) => setCondition(e.target.value)} required>
+                                        <option value="">Choose...</option>
+                                        <option value="NEW">Brand New</option>
+                                        <option value="LIKE_NEW">Like New</option>
+                                        <option value="GOOD">Good Condition</option>
+                                        <option value="FAIR">Fair Condition</option>
+                                        <option value="POOR">Needs Repair</option>
+                                    </select>
+                                </div>
+                                <div className="col-12 text-end">
+                                    <button type="submit" className="btn btn-success px-5" disabled={loading}>Create Item</button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Items Table with inline editing */}
-            <div className="card">
+            {/* --- SECTION: ITEMS TABLE --- */}
+            <div className="card shadow-sm mt-4">
                 <div className="card-body">
-                    <h5 className="card-title">Your Items</h5>
+                    <h5 className="card-title mb-4">Your Inventory</h5>
                     {itemsLoading ? (
-                        <div className="text-center">Loading your items...</div>
+                        <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
                     ) : myItems.length === 0 ? (
-                        <div className="alert alert-info">
-                            You haven't created any items yet. Click "Add New Item" to get started!
-                        </div>
+                        <div className="text-center py-5 text-muted">No items found. Click add to start.</div>
                     ) : (
                         <div className="table-responsive">
-                            <table className="table table-striped">
-                                <thead>
+                            <table className="table align-middle">
+                                <thead className="table-light">
                                 <tr>
-                                    <th>Image</th>
+                                    <th>Main Photo</th>
                                     <th>Name</th>
-                                    <th>Description</th>
                                     <th>Type</th>
-                                    <th>Availability</th>
-                                    <th>Condition</th>
                                     <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                                    <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {myItems.map(item => (
                                     <tr key={item.id}>
                                         <td>
-                                            {item.imageUrls && item.imageUrls.length > 0 ? (
-                                                <img src={item.imageUrls[0]} alt={item.name} style={{width: '50px', height: '50px', objectFit: 'cover'}} />
-                                            ) : (
-                                                <small className="text-muted">No image</small>
-                                            )}
+                                            <img src={item.imageUrls?.[0] || 'https://via.placeholder.com/50'}
+                                                 className="rounded border"
+                                                 style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                 alt="thumb" />
                                         </td>
+                                        <td className="fw-bold">{item.name}</td>
+                                        <td>{item.type}</td>
+                                        <td><span className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>{item.status}</span></td>
                                         <td>
-                                            {editingItem?.id === item.id ? (
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-sm"
-                                                    value={editingItem.name}
-                                                    onChange={(e) => updateEditingItem('name', e.target.value)}
-                                                />
-                                            ) : (
-                                                item.name
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <textarea
-                                                    className="form-control form-control-sm"
-                                                    rows="2"
-                                                    value={editingItem.description}
-                                                    onChange={(e) => updateEditingItem('description', e.target.value)}
-                                                />
-                                            ) : (
-                                                item.description
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={editingItem.type}
-                                                    onChange={(e) => updateEditingItem('type', e.target.value)}
-                                                >
-                                                    <option value="BOOK">Book</option>
-                                                    <option value="CLOTHING">Clothing</option>
-                                                    <option value="TOY">Toy</option>
-                                                    <option value="OTHER">Other</option>
-                                                </select>
-                                            ) : (
-                                                item.type
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={editingItem.availabilityType}
-                                                    onChange={(e) => updateEditingItem('availabilityType', e.target.value)}
-                                                >
-                                                    <option value="TRADE">Trade</option>
-                                                    <option value="DONATION">Give Away/Donate</option>
-                                                </select>
-                                            ) : (
-                                                item.availabilityType || 'N/A'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={editingItem.condition}
-                                                    onChange={(e) => updateEditingItem('condition', e.target.value)}
-                                                >
-                                                    <option value="NEW">New</option>
-                                                    <option value="LIKE_NEW">Like New</option>
-                                                    <option value="GOOD">Good</option>
-                                                    <option value="FAIR">Fair</option>
-                                                    <option value="POOR">Poor</option>
-                                                </select>
-                                            ) : (
-                                                item.condition || 'N/A'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <span className="badge bg-secondary">{editingItem.status}</span>
-                                            ) : (
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={item.status}
-                                                    onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                                                    disabled={loading}
-                                                >
-                                                    <option value="ACTIVE">Active</option>
-                                                    <option value="INACTIVE">Inactive</option>
-                                                    <option value="PENDING">Pending</option>
-                                                    <option value="COMPLETED">Completed</option>
-                                                </select>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <small>{new Date(item.createdAt).toLocaleDateString()}</small>
-                                        </td>
-                                        <td>
-                                            {editingItem?.id === item.id ? (
-                                                <div className="btn-group btn-group-sm">
-                                                    <button
-                                                        className="btn btn-success"
-                                                        onClick={handleSaveEdit}
-                                                        disabled={loading}
-                                                    >
-                                                        Save
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-secondary"
-                                                        onClick={handleCancelEdit}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    className="btn btn-outline-primary btn-sm"
-                                                    onClick={() => handleEdit(item)}
-                                                >
-                                                    Edit
-                                                </button>
-                                            )}
+                                            <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(item)}>Edit</button>
                                         </td>
                                     </tr>
                                 ))}
