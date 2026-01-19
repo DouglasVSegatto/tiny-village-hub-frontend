@@ -24,9 +24,9 @@ const MyItems = () => {
     // File Input Ref
     const fileInputRef = useRef(null);
 
-    // useEffect(() => {
-    //     fetchMyItems();
-    // }, []);
+    useEffect(() => {
+        fetchMyItems();
+    }, []);
 
     const fetchMyItems = async () => {
         try {
@@ -313,6 +313,12 @@ const MyItems = () => {
                         <h5 className="mb-0">Create New Item</h5>
                     </div>
                     <div className="card-body">
+                        <div className="alert alert-info mb-3">
+                            <small>
+                                <strong>📸 Note:</strong> You'll be able to add photos after creating the item. 
+                                Just click "Edit" on your new item to upload images.
+                            </small>
+                        </div>
                         <div className="row g-3">
                             {/* Row 1: Name and Type */}
                             <div className="col-md-6">
