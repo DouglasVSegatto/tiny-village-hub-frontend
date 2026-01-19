@@ -116,7 +116,7 @@ class ItemService {
     async uploadImage(itemId, file) {
         try {
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('file', file);
 
             const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/${itemId}/images`, {
                 method: 'POST',
