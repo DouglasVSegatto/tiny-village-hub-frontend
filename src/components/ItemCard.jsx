@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ItemCard = ({ item }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -6,15 +6,24 @@ const ItemCard = ({ item }) => {
 
     // Using your specific property name
     const images = item.imageUrls || [];
-
     const carouselId = `carousel-${item.id}`;
+
+    // --- NEW: ESCAPE KEY LOGIC ---
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') setIsExpanded(false);
+        };
+        window.addEventListener('keydown', handleEsc);
+
+        // Cleanup listener when component is destroyed
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, []);
 
     const handleContact = (e) => {
         e.stopPropagation();
         alert(`Contacting ${item.ownerUsername} about ${item.name}`);
     };
 
-    // Manual slide control to ensure React state and UI stay synced
     const moveSlide = (e, direction) => {
         e.stopPropagation();
         e.preventDefault();
@@ -26,7 +35,11 @@ const ItemCard = ({ item }) => {
     };
 
     return (
-        <div className="card m-3 shadow-sm" style={{ width: '20rem', border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden' }}>
+        <div
+            className="card m-3 shadow-sm"
+            data-deploy-check="V-CAROUSEL-LIVE" // Look for this in Inspect Element
+            style={{ width: '20rem', border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden' }}
+        >
 
             {/* --- CARD CAROUSEL --- */}
             {images.length > 0 ? (
@@ -48,10 +61,10 @@ const ItemCard = ({ item }) => {
                     {images.length > 1 && (
                         <>
                             <button className="carousel-control-prev" type="button" onClick={(e) => moveSlide(e, 'prev')}>
-                                <span className="carousel-control-prev-icon" aria-hidden="true" style={{ width: '20px' }}></span>
+                                <span className="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style={{ width: '24px', height: '24px', backgroundSize: '60%' }}></span>
                             </button>
                             <button className="carousel-control-next" type="button" onClick={(e) => moveSlide(e, 'next')}>
-                                <span className="carousel-control-next-icon" aria-hidden="true" style={{ width: '20px' }}></span>
+                                <span className="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style={{ width: '24px', height: '24px', backgroundSize: '60%' }}></span>
                             </button>
                         </>
                     )}
@@ -59,14 +72,13 @@ const ItemCard = ({ item }) => {
             ) : (
                 <div className="bg-light d-flex align-items-center justify-content-center" style={{ height: '220px', color: '#ccc' }}>
                     <div className="text-center">
-                        <i className="bi bi-image" style={{ fontSize: '2rem' }}></i>
                         <p className="mb-0 small">No Images Available</p>
                     </div>
                 </div>
             )}
 
             {/* --- CARD BODY --- */}
-            <div className="card-body p-3">
+            <div className="card-body p-3 text-start">
                 <div className="d-flex justify-content-between align-items-start mb-1">
                     <h5 className="card-title fw-bold mb-0 text-truncate" style={{ maxWidth: '70%' }}>{item.name}</h5>
                     <span className="badge bg-success text-uppercase" style={{ fontSize: '0.6rem' }}>{item.status || 'Active'}</span>
@@ -83,12 +95,12 @@ const ItemCard = ({ item }) => {
                 </div>
 
                 <div className="border-top pt-2 mt-2" style={{ fontSize: '0.8rem', lineHeight: '1.5' }}>
-                    <div className="d-flex justify-content-between">
-                        <span className="text-muted">Type:</span>
-                        <span className="fw-semibold">{item.type}</span>
+                    <div className="d-flex justify-content-between text-muted">
+                        <span>Type:</span>
+                        <span className="fw-semibold text-dark">{item.type}</span>
                     </div>
-                    <div className="d-flex justify-content-between">
-                        <span className="text-muted">Owner:</span>
+                    <div className="d-flex justify-content-between text-muted">
+                        <span>Owner:</span>
                         <span className="text-primary">{item.ownerUsername}</span>
                     </div>
                 </div>
@@ -98,16 +110,13 @@ const ItemCard = ({ item }) => {
                 </button>
             </div>
 
-            {/* --- FULLSCREEN LIGHTBOX --- */}
+            {/* --- FULLSCREEN LIGHTBOX (MODAL) --- */}
             {isExpanded && (
                 <div
                     className="modal fade show d-block"
                     style={{ backgroundColor: 'rgba(0,0,0,0.95)', zIndex: 2000 }}
-                    onClick={(e) => {
-                        if (e.target === e.currentTarget) setIsExpanded(false);
-                    }}
+                    onClick={() => setIsExpanded(false)}
                 >
-                    {/* Close Button */}
                     <button
                         className="btn-close btn-close-white position-absolute top-0 end-0 m-4 shadow-none"
                         style={{ zIndex: 2100, width: '2em', height: '2em' }}
@@ -142,11 +151,9 @@ const ItemCard = ({ item }) => {
                             )}
                         </div>
 
-                        {/* Lightbox Footer Information */}
-                        <div className="text-white text-center mt-4 bg-dark bg-opacity-50 p-3 rounded-3 w-75">
+                        <div className="text-white text-center mt-4">
                             <h3 className="fw-bold">{item.name}</h3>
-                            <p className="mb-3 opacity-75">Owner: {item.ownerUsername} | Condition: {item.condition}</p>
-                            <button className="btn btn-light btn-lg px-5 fw-bold" onClick={handleContact}>
+                            <button className="btn btn-outline-light px-5 mt-2" onClick={handleContact}>
                                 Send Message
                             </button>
                         </div>
