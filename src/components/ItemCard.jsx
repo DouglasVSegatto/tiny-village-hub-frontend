@@ -17,6 +17,7 @@ const ItemCard = ({ item }) => {
     // Manual slide control to ensure React state and UI stay synced
     const moveSlide = (e, direction) => {
         e.stopPropagation();
+        e.preventDefault();
         if (direction === 'next') {
             setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
         } else {
@@ -102,7 +103,9 @@ const ItemCard = ({ item }) => {
                 <div
                     className="modal fade show d-block"
                     style={{ backgroundColor: 'rgba(0,0,0,0.95)', zIndex: 2000 }}
-                    onClick={() => setIsExpanded(false)}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsExpanded(false);
+                    }}
                 >
                     {/* Close Button */}
                     <button
