@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ItemService from '../services/ItemService';
-import { fakeItems } from '../temp/fakeItemsData'; // Adjust path if needed
 
 const MyItems = () => {
     // Form States
@@ -11,10 +10,6 @@ const MyItems = () => {
     const [availabilityType, setAvailabilityType] = useState('');
     const [condition, setCondition] = useState('');
     const [status, setStatus] = useState('');
-
-    //TEST LIST & LOADING STATES
-    // const [myItems, setMyItems] = useState(fakeItems);
-    // const [itemsLoading, setItemsLoading] = useState(false);
 
     // List & Loading States
     const [myItems, setMyItems] = useState([]);

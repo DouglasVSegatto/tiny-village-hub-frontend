@@ -17,9 +17,6 @@ import Profile from './views/Profile.jsx';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Protected User Dashboard/Profile
 import MyItems from './views/MyItems.jsx';
 
-// TEST COMPONENT - Remove before production
-import TestItemView from './temp/TestItemView.jsx';
-
 
 // --- Placeholder Components ---
 // Ensure these files exist in your views/components folder.
@@ -51,9 +48,6 @@ function App() {
                         <Route path="/" element={<Home/>}/>
                         <Route path="/list" element={<ItemListView/>}/>
                         <Route path="/items/:itemId" element={<ItemDetails/>}/>
-
-                        {/* TEST ROUTE - Remove before production */}
-                        <Route path="/test-carousel" element={<TestItemView/>}/>
 
                         {/* Authentication Routes */}
                         <Route path="/login" element={<Login/>}/>
