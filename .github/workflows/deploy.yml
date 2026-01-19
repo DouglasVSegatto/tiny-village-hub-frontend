@@ -15,4 +15,4 @@ jobs:
       - name: Build & deploy frontend
         run: |
           cd /home/popcornpalace/deployment/stacks/web-project
-          docker compose up -d --build --force-recreate --no-deps frontend-app
+          docker compose up -d --build --no-deps frontend-app
