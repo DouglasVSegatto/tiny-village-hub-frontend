@@ -8,23 +8,28 @@ const ItemListView = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [page, setPage] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
 
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                setLoading(true);
-                const itemsData = await ItemService.getAvailableItems();
-                setItems(itemsData);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchItems();
     }, []);
 
-    if (loading) return <div className="container mt-4"><div className="text-center">Loading items...</div></div>;
+    const fetchItems = async () => {
+        try {
+            setLoading(true);
+            const data = await ItemService.getAvailableItems(page);
+            setItems(prev => [...prev, ...data.items]);
+            setHasNext(data.hasNext);
+            setPage(prev => prev + 1);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading && items.length === 0) return <div className="container mt-4"><div className="text-center">Loading items...</div></div>;
     if (error) return <div className="container mt-4"><div className="alert alert-danger">{error}</div></div>;
 
     return (
@@ -42,6 +47,13 @@ const ItemListView = () => {
                             <ItemCard item={item} />
                         </div>
                     ))}
+                </div>
+            )}
+            {hasNext && (
+                <div className="text-center mt-4">
+                    <button className="btn btn-primary" onClick={fetchItems} disabled={loading}>
+                        {loading ? 'Loading...' : 'Load More'}
+                    </button>
                 </div>
             )}
         </div>

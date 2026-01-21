@@ -9,12 +9,11 @@ import Navigation from './components/Navigation.jsx';
 import AuthContext from './context/AuthContext.jsx'; // We'll create this next
 
 // Import Views (Components that map to full pages)
-import ItemListView from './views/ItemListView.jsx'; // Component for all public items
-import ItemDetails from './views/ItemDetails.jsx';   // Component for single item view
+import ItemListView from './views/ItemListView.jsx';
+import ItemDetails from './views/ItemDetails.jsx';
 import Login from './components/Login.jsx';
 import Register from './components/Register.jsx';
-import Profile from './views/Profile.jsx';
-import ProtectedRoute from "./components/ProtectedRoute.jsx";           // Protected User Dashboard/Profile
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import MyItems from './views/MyItems.jsx';
 
 

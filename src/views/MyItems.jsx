@@ -14,6 +14,8 @@ const MyItems = () => {
     // List & Loading States
     const [myItems, setMyItems] = useState([]);
     const [itemsLoading, setItemsLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
 
 
     const [editingItem, setEditingItem] = useState(null);
@@ -32,8 +34,10 @@ const MyItems = () => {
     const fetchMyItems = async () => {
         try {
             setItemsLoading(true);
-            const items = await ItemService.getMyItems();
-            setMyItems(items);
+            const data = await ItemService.getMyItems(page);
+            setMyItems(prev => [...prev, ...data.items]);
+            setHasNext(data.hasNext);
+            setPage(prev => prev + 1);
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -90,12 +94,13 @@ const MyItems = () => {
         }
     };
 
-    // Helper to sync state after image changes
     const refreshEditingItem = async (id) => {
-        const items = await ItemService.getMyItems();
-        setMyItems(items);
-        const updated = items.find(i => i.id === id);
-        setEditingItem(updated);
+        const data = await ItemService.getMyItems(0, page * 20);
+        const updated = data.items.find(i => i.id === id);
+        if (updated) {
+            setEditingItem(updated);
+            setMyItems(prev => prev.map(item => item.id === id ? updated : item));
+        }
     };
 
     // --- ITEM DATA HANDLERS ---
@@ -132,6 +137,8 @@ const MyItems = () => {
             setIsError(false);
             setEditingItem(null);
             setOriginalItem(null);
+            setMyItems([]);
+            setPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -156,6 +163,8 @@ const MyItems = () => {
             setMessage('Item details updated!');
             setIsError(false);
             setEditingItem(null);
+            setMyItems([]);
+            setPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -178,6 +187,8 @@ const MyItems = () => {
             setIsError(false);
             setName(''); setDescription(''); setType(''); setAvailabilityType(''); setCondition(''); setStatus('');
             setShowForm(false);
+            setMyItems([]);
+            setPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -453,6 +464,13 @@ const MyItems = () => {
                                 ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+                    {hasNext && (
+                        <div className="text-center mt-3">
+                            <button className="btn btn-primary" onClick={fetchMyItems} disabled={itemsLoading}>
+                                {itemsLoading ? 'Loading...' : 'Load More'}
+                            </button>
                         </div>
                     )}
                 </div>

@@ -2,11 +2,12 @@ import AuthService from "./AuthService.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ITEMS_ENDPOINT = '/items';
+const PAGINATED_PATH = '/paginated'; // Set to '' when ready to remove
 
 class ItemService {
-    async getAvailableItems() {
+    async getAvailableItems(page = 0, size = 20) {
         try {
-            const response = await fetch(`${API_BASE_URL}${ITEMS_ENDPOINT}/available`);
+            const response = await fetch(`${API_BASE_URL}${ITEMS_ENDPOINT}${PAGINATED_PATH}?page=${page}&size=${size}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -40,9 +41,9 @@ class ItemService {
         }
     }
 
-    async getMyItems() {
+    async getMyItems(page = 0, size = 20) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/my-items`);
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}${PAGINATED_PATH}/my-items?page=${page}&size=${size}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
