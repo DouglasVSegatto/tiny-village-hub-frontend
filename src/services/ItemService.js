@@ -7,7 +7,7 @@ const PAGINATED_PATH = '/paginated'; // Set to '' when ready to remove
 class ItemService {
     async getAvailableItems(page = 0, size = 20) {
         try {
-            const response = await fetch(`${API_BASE_URL}${ITEMS_ENDPOINT}${PAGINATED_PATH}?page=${page}&size=${size}`);
+            const response = await fetch(`${API_BASE_URL}${ITEMS_ENDPOINT}/search${PAGINATED_PATH}?page=${page}&size=${size}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -43,7 +43,7 @@ class ItemService {
 
     async getMyItems(page = 0, size = 20) {
         try {
-            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}${PAGINATED_PATH}/my-items?page=${page}&size=${size}`);
+            const response = await AuthService.makeAuthenticatedRequest(`${API_BASE_URL}${ITEMS_ENDPOINT}/my-items${PAGINATED_PATH}?page=${page}&size=${size}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
