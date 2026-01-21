@@ -34,10 +34,11 @@ const MyItems = () => {
     const fetchMyItems = async () => {
         try {
             setItemsLoading(true);
-            const data = await ItemService.getMyItems(page);
+            const currentPage = page;
+            const data = await ItemService.getMyItems(currentPage);
             setMyItems(prev => [...prev, ...data.items]);
             setHasNext(data.hasNext);
-            setPage(prev => prev + 1);
+            setPage(currentPage + 1);
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -55,22 +56,26 @@ const MyItems = () => {
         const file = e.target.files[0];
         if (!file || !editingItem) return;
 
-        try {
-            setLoading(true);
-            // Sending to your @PostMapping endpoint
-            await ItemService.uploadImage(editingItem.id, file);
+        const tempId = Date.now();
+        setEditingItem(prev => ({
+            ...prev,
+            imageUrls: [...(prev.imageUrls || []), `uploading-${tempId}`]
+        }));
 
+        try {
+            await ItemService.uploadImage(editingItem.id, file);
             setMessage('Image uploaded successfully!');
             setIsError(false);
-
-            // Refresh data to show new image
             await refreshEditingItem(editingItem.id);
         } catch (error) {
             setMessage(error.message);
             setIsError(true);
+            setEditingItem(prev => ({
+                ...prev,
+                imageUrls: prev.imageUrls.filter(url => url !== `uploading-${tempId}`)
+            }));
         } finally {
-            setLoading(false);
-            e.target.value = null; // Clear input
+            e.target.value = null;
         }
     };
 
@@ -79,12 +84,9 @@ const MyItems = () => {
 
         try {
             setLoading(true);
-            // Sending to your @DeleteMapping("/{index}") endpoint
             await ItemService.deleteImage(editingItem.id, index);
-
             setMessage('Image removed.');
             setIsError(false);
-
             await refreshEditingItem(editingItem.id);
         } catch (error) {
             setMessage(error.message);
@@ -217,14 +219,21 @@ const MyItems = () => {
             {/* --- SECTION: EDIT ITEM (With Image Manager) --- */}
             {editingItem && (
                 <div className="card mb-4 border-primary shadow-sm">
-                    <div className="card-header bg-primary text-white">
+                    <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">Edit Item & Photos</h5>
+                        <button 
+                            type="button" 
+                            className="btn-close btn-close-white" 
+                            onClick={handleCancelEdit}
+                            aria-label="Close"
+                        ></button>
                     </div>
                     <div className="card-body">
                         <label className="form-label fw-bold mb-3">Item Gallery (Max 5 Pictures)</label>
                         <div className="d-flex gap-3 mb-4 overflow-auto pb-2">
                             {[0, 1, 2, 3, 4].map((index) => {
                                 const url = editingItem.imageUrls && editingItem.imageUrls[index];
+                                const isUploading = url && url.startsWith('uploading-');
                                 const isNextAvailableSlot = index === (editingItem.imageUrls ? editingItem.imageUrls.length : 0);
 
                                 return (
@@ -233,7 +242,11 @@ const MyItems = () => {
                                         className="position-relative border rounded bg-light shadow-sm"
                                         style={{ width: '120px', height: '120px', flexShrink: 0, overflow: 'hidden' }}
                                     >
-                                        {url ? (
+                                        {isUploading ? (
+                                            <div className="w-100 h-100 d-flex align-items-center justify-content-center">
+                                                <div className="spinner-border text-primary" role="status"></div>
+                                            </div>
+                                        ) : url ? (
                                             <>
                                                 <img
                                                     src={url}

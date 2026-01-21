@@ -18,10 +18,11 @@ const ItemListView = () => {
     const fetchItems = async () => {
         try {
             setLoading(true);
-            const data = await ItemService.getAvailableItems(page);
+            const currentPage = page;
+            const data = await ItemService.getAvailableItems(currentPage);
             setItems(prev => [...prev, ...data.items]);
             setHasNext(data.hasNext);
-            setPage(prev => prev + 1);
+            setPage(currentPage + 1);
         } catch (err) {
             setError(err.message);
         } finally {
