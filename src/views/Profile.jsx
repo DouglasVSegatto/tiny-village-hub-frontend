@@ -62,7 +62,6 @@ const Profile = () => {
         setMessage('Profile picture upload endpoint not implemented yet');
         // TODO: Call API endpoint when ready
     };
-    }, [isAuthenticated, navigate]);
 
     if (!isAuthenticated) return null;
     if (loading) return <div className="container mt-5 text-center"><div className="spinner-border"></div></div>;
