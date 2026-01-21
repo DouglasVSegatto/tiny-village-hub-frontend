@@ -19,7 +19,7 @@ const Profile = () => {
 
         const fetchProfile = async () => {
             try {
-                const response = await AuthService.makeAuthenticatedRequest(`${AuthService.API_BASE_URL}/users/me`);
+                const response = await AuthService.makeAuthenticatedRequest(`${AuthService.API_BASE_URL}/api/users/me`);
                 if (response.ok) {
                     const data = await response.json();
                     setProfile(data);
