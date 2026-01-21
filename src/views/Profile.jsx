@@ -1,46 +1,89 @@
 // src/views/Profile.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import ItemUploadForm from '../components/ItemUploadForm.jsx';
+import AuthService from '../services/AuthService.js';
 
 const Profile = () => {
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Protection Guard: If not logged in, redirect to login page
-    if (!isAuthenticated) {
-        navigate('/login');
-        return null; // Return null to prevent rendering the protected content
-    }
+    useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
 
-    const handleItemUploadSuccess = () => {
-        console.log("Upload successful! Item list needs to be refreshed.");
-        // In a real scenario, this would trigger a state change or refetch of MyItemsList
-    };
+        const fetchProfile = async () => {
+            try {
+                const response = await AuthService.makeAuthenticatedRequest(`${AuthService.API_BASE_URL}/users/me`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfile(data);
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // Since isAuthenticated is true, 'user' object should be safe to access
+        fetchProfile();
+    }, [isAuthenticated, navigate]);
+
+    if (!isAuthenticated) return null;
+    if (loading) return <div className="container mt-5 text-center"><div className="spinner-border"></div></div>;
+    if (!profile) return <div className="container mt-5"><div className="alert alert-danger">Failed to load profile</div></div>;
+
+    const getInitials = (username) => username?.substring(0, 2).toUpperCase() || 'U';
+
     return (
-        <div style={{ padding: '20px' }}>
-            <h2>Welcome to Your Profile Dashboard, {user.username}!</h2>
+        <div className="container mt-5">
+            <div className="row justify-content-center">
+                <div className="col-md-8">
+                    <div className="card shadow-sm">
+                        <div className="card-body p-4">
+                            <div className="d-flex align-items-center mb-4">
+                                <div 
+                                    className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" 
+                                    style={{ width: '100px', height: '100px', fontSize: '2rem' }}
+                                >
+                                    {getInitials(profile.username)}
+                                </div>
+                                <div className="ms-4">
+                                    <h2 className="mb-1">{profile.username}</h2>
+                                    <p className="text-muted mb-0">{profile.email}</p>
+                                    <small className="text-muted">Member since {new Date(profile.joinDate).toLocaleDateString()}</small>
+                                </div>
+                            </div>
 
-            <hr style={{ margin: '20px 0' }}/>
+                            <hr />
 
-            {/* Replace Placeholder with actual form */}
-            <h3>Upload a New Item</h3>
-            <ItemUploadForm onUploadSuccess={handleItemUploadSuccess} />
-
-            {/* Placeholder for My Uploaded Items List */}
-            <h3 style={{ marginTop: '40px' }}>My Uploaded Items</h3>
-            <div style={{ border: '1px solid #eee', padding: '15px' }}>
-                [MyItemsList Component (Will fetch data from /api/profile/my-items)]
-            </div>
-
-            {/* Placeholder for Trade Requests */}
-            <h3 style={{ marginTop: '40px' }}>Incoming Trade Requests</h3>
-            <div style={{ border: '1px solid #eee', padding: '15px' }}>
-                [TradeRequests Component (To be built)]
+                            <h5 className="mb-3">Location</h5>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label text-muted small">Neighborhood</label>
+                                    <p className="fw-semibold">{profile.neighborhood || 'Not set'}</p>
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label text-muted small">City</label>
+                                    <p className="fw-semibold">{profile.city || 'Not set'}</p>
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label text-muted small">State</label>
+                                    <p className="fw-semibold">{profile.state || 'Not set'}</p>
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label text-muted small">Country</label>
+                                    <p className="fw-semibold">{profile.country || 'Not set'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

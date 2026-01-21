@@ -103,6 +103,16 @@ const ItemCard = ({ item }) => {
                         <span>Owner:</span>
                         <span className="text-primary">{item.ownerUsername}</span>
                     </div>
+                    <div className="d-flex justify-content-between text-muted">
+                        <span>Location:</span>
+                        <span className="fw-semibold text-dark">
+                            {[item.neighbourhood, item.city, item.state, item.country].filter(Boolean).join(', ')}
+                        </span>
+                    </div>
+                    <div className="d-flex justify-content-between text-muted">
+                        <span>Posted:</span>
+                        <span className="fw-semibold text-dark">{new Date(item.createdAt).toLocaleDateString()}</span>
+                    </div>
                 </div>
 
                 <button className="btn btn-primary w-100 mt-3 fw-bold btn-sm" onClick={handleContact}>
