@@ -15,6 +15,7 @@ import Login from './components/Login.jsx';
 import Register from './components/Register.jsx';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import MyItems from './views/MyItems.jsx';
+import Profile from './views/Profile.jsx';
 
 
 // --- Placeholder Components ---
@@ -53,12 +54,11 @@ function App() {
                         <Route path="/register" element={<Register/>}/>
 
                         {/* Protected Routes */}
-                        <Route path="/profile" element={<ProtectedRoute/>}/>
+                        <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
+                        <Route path="/my-items" element={<MyItems/>}/>
 
                         {/* Fallback Route */}
                         <Route path="*" element={<NotFound/>}/>
-
-                        <Route path="/my-items" element={<MyItems/>}/>
                     </Routes>
                 </div>
             </Router>
