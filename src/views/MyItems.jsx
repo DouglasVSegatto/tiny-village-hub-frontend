@@ -14,8 +14,8 @@ const MyItems = () => {
     // List & Loading States
     const [myItems, setMyItems] = useState([]);
     const [itemsLoading, setItemsLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [hasNext, setHasNext] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
 
     const [editingItem, setEditingItem] = useState(null);
@@ -29,16 +29,14 @@ const MyItems = () => {
 
     useEffect(() => {
         fetchMyItems();
-    }, []);
+    }, [currentPage]);
 
     const fetchMyItems = async () => {
         try {
             setItemsLoading(true);
-            const currentPage = page;
-            const data = await ItemService.getMyItems(currentPage);
-            setMyItems(prev => [...prev, ...data.items]);
-            setHasNext(data.hasNext);
-            setPage(currentPage + 1);
+            const data = await ItemService.getMyItems(currentPage, 10);
+            setMyItems(data.items);
+            setTotalPages(data.totalPages);
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -97,7 +95,7 @@ const MyItems = () => {
     };
 
     const refreshEditingItem = async (id) => {
-        const data = await ItemService.getMyItems(0, page * 20);
+        const data = await ItemService.getMyItems(currentPage, 10);
         const updated = data.items.find(i => i.id === id);
         if (updated) {
             setEditingItem(updated);
@@ -139,8 +137,7 @@ const MyItems = () => {
             setIsError(false);
             setEditingItem(null);
             setOriginalItem(null);
-            setMyItems([]);
-            setPage(0);
+            setCurrentPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -165,8 +162,6 @@ const MyItems = () => {
             setMessage('Item details updated!');
             setIsError(false);
             setEditingItem(null);
-            setMyItems([]);
-            setPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -189,8 +184,7 @@ const MyItems = () => {
             setIsError(false);
             setName(''); setDescription(''); setType(''); setAvailabilityType(''); setCondition(''); setStatus('');
             setShowForm(false);
-            setMyItems([]);
-            setPage(0);
+            setCurrentPage(0);
             fetchMyItems();
         } catch (error) {
             setMessage(error.message);
@@ -479,10 +473,22 @@ const MyItems = () => {
                             </table>
                         </div>
                     )}
-                    {hasNext && (
-                        <div className="text-center mt-3">
-                            <button className="btn btn-primary" onClick={fetchMyItems} disabled={itemsLoading}>
-                                {itemsLoading ? 'Loading...' : 'Load More'}
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-center align-items-center gap-2 mt-3">
+                            <button 
+                                className="btn btn-outline-primary" 
+                                onClick={() => setCurrentPage(prev => prev - 1)} 
+                                disabled={currentPage === 0}
+                            >
+                                Previous
+                            </button>
+                            <span>Page {currentPage + 1} of {totalPages}</span>
+                            <button 
+                                className="btn btn-outline-primary" 
+                                onClick={() => setCurrentPage(prev => prev + 1)} 
+                                disabled={currentPage === totalPages - 1}
+                            >
+                                Next
                             </button>
                         </div>
                     )}
