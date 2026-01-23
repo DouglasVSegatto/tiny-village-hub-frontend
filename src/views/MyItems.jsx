@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import ItemService from '../services/ItemService';
 
 const MyItems = () => {
@@ -10,6 +10,8 @@ const MyItems = () => {
     const [availabilityType, setAvailabilityType] = useState('');
     const [condition, setCondition] = useState('');
     const [status, setStatus] = useState('');
+    const [statusCounts, setStatusCounts] = useState({});
+
 
     // List & Loading States
     const [myItems, setMyItems] = useState([]);
@@ -37,6 +39,7 @@ const MyItems = () => {
             const data = await ItemService.getMyItems(currentPage, 10);
             setMyItems(data.items);
             setTotalPages(data.totalPages);
+            setStatusCounts(data.statusCount || {});
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -106,10 +109,10 @@ const MyItems = () => {
     // --- ITEM DATA HANDLERS ---
 
     const handleEdit = (item) => {
-        setEditingItem({ ...item });
-        setOriginalItem({ ...item });
+        setEditingItem({...item});
+        setOriginalItem({...item});
         setShowForm(false); // Close create form if open
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     };
 
     const handleCancelEdit = () => {
@@ -120,11 +123,11 @@ const MyItems = () => {
     const hasChanges = () => {
         if (!editingItem || !originalItem) return false;
         return editingItem.name !== originalItem.name ||
-               editingItem.description !== originalItem.description ||
-               editingItem.type !== originalItem.type ||
-               editingItem.availabilityType !== originalItem.availabilityType ||
-               editingItem.condition !== originalItem.condition ||
-               editingItem.status !== originalItem.status;
+            editingItem.description !== originalItem.description ||
+            editingItem.type !== originalItem.type ||
+            editingItem.availabilityType !== originalItem.availabilityType ||
+            editingItem.condition !== originalItem.condition ||
+            editingItem.status !== originalItem.status;
     };
 
     const handleDeleteItem = async (itemId) => {
@@ -172,17 +175,22 @@ const MyItems = () => {
     };
 
     const updateEditingItem = (field, value) => {
-        setEditingItem(prev => ({ ...prev, [field]: value }));
+        setEditingItem(prev => ({...prev, [field]: value}));
     };
 
     const handleSubmitCreate = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await ItemService.createItem({ name, description, type, availabilityType, condition, status });
+            await ItemService.createItem({name, description, type, availabilityType, condition, status});
             setMessage('Item created! Now you can edit it to add pictures.');
             setIsError(false);
-            setName(''); setDescription(''); setType(''); setAvailabilityType(''); setCondition(''); setStatus('');
+            setName('');
+            setDescription('');
+            setType('');
+            setAvailabilityType('');
+            setCondition('');
+            setStatus('');
             setShowForm(false);
             setCurrentPage(0);
             fetchMyItems();
@@ -198,13 +206,17 @@ const MyItems = () => {
         <div className="container mt-4 mb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="fw-bold">Inventory Management</h2>
-                <button className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'}`} onClick={() => { setShowForm(!showForm); setEditingItem(null); }}>
+                <button className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'}`} onClick={() => {
+                    setShowForm(!showForm);
+                    setEditingItem(null);
+                }}>
                     {showForm ? 'Cancel' : '+ Add New Item'}
                 </button>
             </div>
 
             {message && (
-                <div className={`alert alert-dismissible fade show ${isError ? 'alert-danger' : 'alert-success'}`} role="alert">
+                <div className={`alert alert-dismissible fade show ${isError ? 'alert-danger' : 'alert-success'}`}
+                     role="alert">
                     {message}
                     <button type="button" className="btn-close" onClick={() => setMessage(null)}></button>
                 </div>
@@ -213,11 +225,12 @@ const MyItems = () => {
             {/* --- SECTION: EDIT ITEM (With Image Manager) --- */}
             {editingItem && (
                 <div className="card mb-4 border-primary shadow-sm">
-                    <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div
+                        className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">Edit Item & Photos</h5>
-                        <button 
-                            type="button" 
-                            className="btn-close btn-close-white" 
+                        <button
+                            type="button"
+                            className="btn-close btn-close-white"
                             onClick={handleCancelEdit}
                             aria-label="Close"
                         ></button>
@@ -234,10 +247,11 @@ const MyItems = () => {
                                     <div
                                         key={index}
                                         className="position-relative border rounded bg-light shadow-sm"
-                                        style={{ width: '120px', height: '120px', flexShrink: 0, overflow: 'hidden' }}
+                                        style={{width: '120px', height: '120px', flexShrink: 0, overflow: 'hidden'}}
                                     >
                                         {isUploading ? (
-                                            <div className="w-100 h-100 d-flex align-items-center justify-content-center">
+                                            <div
+                                                className="w-100 h-100 d-flex align-items-center justify-content-center">
                                                 <div className="spinner-border text-primary" role="status"></div>
                                             </div>
                                         ) : url ? (
@@ -246,7 +260,7 @@ const MyItems = () => {
                                                     src={url}
                                                     alt={`Attachment ${index + 1}`}
                                                     className="w-100 h-100"
-                                                    style={{ objectFit: 'cover' }}
+                                                    style={{objectFit: 'cover'}}
                                                 />
                                                 {/* The Red X Button */}
                                                 <button
@@ -260,8 +274,10 @@ const MyItems = () => {
                                                         borderWidth: '2px'
                                                     }}
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                         fill="currentColor" viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
                                                     </svg>
                                                 </button>
                                             </>
@@ -271,13 +287,20 @@ const MyItems = () => {
                                                 onClick={handleUploadClick}
                                             >
                                                 <span className="fs-2 fw-light">+</span>
-                                                <small style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }}>Add Photo</small>
+                                                <small style={{
+                                                    fontSize: '10px',
+                                                    textTransform: 'uppercase',
+                                                    fontWeight: 'bold'
+                                                }}>Add Photo</small>
                                             </button>
                                         ) : (
-                                            <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted opacity-50">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                            <div
+                                                className="w-100 h-100 d-flex align-items-center justify-content-center text-muted opacity-50">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                     fill="currentColor" viewBox="0 0 16 16">
                                                     <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
-                                                    <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8zM1 5v8.001c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1z"/>
+                                                    <path
+                                                        d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8zM1 5v8.001c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1z"/>
                                                 </svg>
                                             </div>
                                         )}
@@ -287,17 +310,20 @@ const MyItems = () => {
                         </div>
 
                         {/* Hidden File Input */}
-                        <input type="file" ref={fileInputRef} className="d-none" onChange={onFileChange} accept="image/*" />
+                        <input type="file" ref={fileInputRef} className="d-none" onChange={onFileChange}
+                               accept="image/*"/>
 
                         <div className="row g-3">
                             {/* Row 1: Name and Type */}
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Item Name</label>
-                                <input type="text" className="form-control" value={editingItem.name} onChange={(e) => updateEditingItem('name', e.target.value)} />
+                                <input type="text" className="form-control" value={editingItem.name}
+                                       onChange={(e) => updateEditingItem('name', e.target.value)}/>
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label fw-bold">Type</label>
-                                <select className="form-select" value={editingItem.type} onChange={(e) => updateEditingItem('type', e.target.value)}>
+                                <select className="form-select" value={editingItem.type}
+                                        onChange={(e) => updateEditingItem('type', e.target.value)}>
                                     <option value="BOOK">Book</option>
                                     <option value="CLOTHING">Clothing</option>
                                     <option value="TOY">Toy</option>
@@ -306,7 +332,8 @@ const MyItems = () => {
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label fw-bold">Status</label>
-                                <select className="form-select" value={editingItem.status} onChange={(e) => updateEditingItem('status', e.target.value)}>
+                                <select className="form-select" value={editingItem.status}
+                                        onChange={(e) => updateEditingItem('status', e.target.value)}>
                                     <option value="ACTIVE">Active</option>
                                     <option value="INACTIVE">Hidden</option>
                                     <option value="PENDING">In Discussion</option>
@@ -317,7 +344,8 @@ const MyItems = () => {
                             {/* Row 2: Condition and Availability (The Missing Parts) */}
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Condition</label>
-                                <select className="form-select" value={editingItem.condition} onChange={(e) => updateEditingItem('condition', e.target.value)}>
+                                <select className="form-select" value={editingItem.condition}
+                                        onChange={(e) => updateEditingItem('condition', e.target.value)}>
                                     <option value="NEW">Brand New</option>
                                     <option value="LIKE_NEW">Like New</option>
                                     <option value="GOOD">Good Condition</option>
@@ -327,7 +355,8 @@ const MyItems = () => {
                             </div>
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Availability</label>
-                                <select className="form-select" value={editingItem.availabilityType} onChange={(e) => updateEditingItem('availabilityType', e.target.value)}>
+                                <select className="form-select" value={editingItem.availabilityType}
+                                        onChange={(e) => updateEditingItem('availabilityType', e.target.value)}>
                                     <option value="TRADE">Trade</option>
                                     <option value="DONATION">Give Away/Donate</option>
                                     <option value="SHARE">Share</option>
@@ -337,7 +366,8 @@ const MyItems = () => {
                             {/* Row 3: Description */}
                             <div className="col-12">
                                 <label className="form-label fw-bold">Description</label>
-                                <textarea className="form-control" rows="3" value={editingItem.description} onChange={(e) => updateEditingItem('description', e.target.value)}></textarea>
+                                <textarea className="form-control" rows="3" value={editingItem.description}
+                                          onChange={(e) => updateEditingItem('description', e.target.value)}></textarea>
                             </div>
                         </div>
 
@@ -346,8 +376,10 @@ const MyItems = () => {
                                 🗑️ Delete Item
                             </button>
                             <div className="d-flex gap-2">
-                                <button className="btn btn-secondary" onClick={handleCancelEdit}>Discard Changes</button>
-                                <button className="btn btn-success px-4" onClick={handleSaveEdit} disabled={loading || !hasChanges()}>
+                                <button className="btn btn-secondary" onClick={handleCancelEdit}>Discard Changes
+                                </button>
+                                <button className="btn btn-success px-4" onClick={handleSaveEdit}
+                                        disabled={loading || !hasChanges()}>
                                     {loading ? 'Saving...' : 'Save All Details'}
                                 </button>
                             </div>
@@ -365,7 +397,7 @@ const MyItems = () => {
                     <div className="card-body">
                         <div className="alert alert-info mb-3">
                             <small>
-                                <strong>📸 Note:</strong> You'll be able to add photos after creating the item. 
+                                <strong>📸 Note:</strong> You'll be able to add photos after creating the item.
                                 Just click "Edit" on your new item to upload images.
                             </small>
                         </div>
@@ -373,11 +405,13 @@ const MyItems = () => {
                             {/* Row 1: Name and Type */}
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Item Name</label>
-                                <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
+                                <input type="text" className="form-control" value={name}
+                                       onChange={(e) => setName(e.target.value)} required/>
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label fw-bold">Type</label>
-                                <select className="form-select" value={type} onChange={(e) => setType(e.target.value)} required>
+                                <select className="form-select" value={type} onChange={(e) => setType(e.target.value)}
+                                        required>
                                     <option value="">Choose...</option>
                                     <option value="BOOK">Book</option>
                                     <option value="CLOTHING">Clothing</option>
@@ -387,7 +421,8 @@ const MyItems = () => {
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label fw-bold">Status</label>
-                                <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)} required>
+                                <select className="form-select" value={status}
+                                        onChange={(e) => setStatus(e.target.value)} required>
                                     <option value="">Choose...</option>
                                     <option value="ACTIVE">Active</option>
                                     <option value="INACTIVE">Hidden</option>
@@ -397,7 +432,8 @@ const MyItems = () => {
                             {/* Row 2: Condition and Availability */}
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Condition</label>
-                                <select className="form-select" value={condition} onChange={(e) => setCondition(e.target.value)} required>
+                                <select className="form-select" value={condition}
+                                        onChange={(e) => setCondition(e.target.value)} required>
                                     <option value="">Choose...</option>
                                     <option value="NEW">Brand New</option>
                                     <option value="LIKE_NEW">Like New</option>
@@ -408,7 +444,8 @@ const MyItems = () => {
                             </div>
                             <div className="col-md-6">
                                 <label className="form-label fw-bold">Availability</label>
-                                <select className="form-select" value={availabilityType} onChange={(e) => setAvailabilityType(e.target.value)} required>
+                                <select className="form-select" value={availabilityType}
+                                        onChange={(e) => setAvailabilityType(e.target.value)} required>
                                     <option value="">Choose...</option>
                                     <option value="TRADE">Trade</option>
                                     <option value="DONATION">Give Away/Donate</option>
@@ -418,7 +455,8 @@ const MyItems = () => {
                             {/* Row 3: Description */}
                             <div className="col-12">
                                 <label className="form-label fw-bold">Description</label>
-                                <textarea className="form-control" rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+                                <textarea className="form-control" rows="3" value={description}
+                                          onChange={(e) => setDescription(e.target.value)} required></textarea>
                             </div>
                         </div>
 
@@ -435,9 +473,22 @@ const MyItems = () => {
             {/* --- SECTION: ITEMS TABLE --- */}
             <div className="card shadow-sm mt-4">
                 <div className="card-body">
-                    <h5 className="card-title mb-4">Your Inventory</h5>
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h5 className="mb-0">Your Inventory</h5>
+                        <div className="d-flex gap-3 text-muted small">
+                            {Object.entries(statusCounts).map(([status, count]) =>
+                                    count > 0 && (
+                                        <span key={status}>
+                    <strong>{status}:</strong> {count}
+                </span>
+                                    )
+                            )}
+                        </div>
+                    </div>
                     {itemsLoading ? (
-                        <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary"></div>
+                        </div>
                     ) : myItems.length === 0 ? (
                         <div className="text-center py-5 text-muted">No items found. Click add to start.</div>
                     ) : (
@@ -458,14 +509,18 @@ const MyItems = () => {
                                         <td>
                                             <img src={item.imageUrls?.[0] || 'https://via.placeholder.com/50'}
                                                  className="rounded border"
-                                                 style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                                 alt="thumb" />
+                                                 style={{width: '50px', height: '50px', objectFit: 'cover'}}
+                                                 alt="thumb"/>
                                         </td>
                                         <td className="fw-bold">{item.name}</td>
                                         <td>{item.type}</td>
-                                        <td><span className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>{item.status}</span></td>
+                                        <td><span
+                                            className={`badge ${item.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`}>{item.status}</span>
+                                        </td>
                                         <td>
-                                            <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(item)}>Edit</button>
+                                            <button className="btn btn-sm btn-outline-primary"
+                                                    onClick={() => handleEdit(item)}>Edit
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -475,17 +530,17 @@ const MyItems = () => {
                     )}
                     {totalPages > 1 && (
                         <div className="d-flex justify-content-center align-items-center gap-2 mt-3">
-                            <button 
-                                className="btn btn-outline-primary" 
-                                onClick={() => setCurrentPage(prev => prev - 1)} 
+                            <button
+                                className="btn btn-outline-primary"
+                                onClick={() => setCurrentPage(prev => prev - 1)}
                                 disabled={currentPage === 0}
                             >
                                 Previous
                             </button>
                             <span>Page {currentPage + 1} of {totalPages}</span>
-                            <button 
-                                className="btn btn-outline-primary" 
-                                onClick={() => setCurrentPage(prev => prev + 1)} 
+                            <button
+                                className="btn btn-outline-primary"
+                                onClick={() => setCurrentPage(prev => prev + 1)}
                                 disabled={currentPage === totalPages - 1}
                             >
                                 Next
