@@ -12,6 +12,17 @@ const MyItems = () => {
     const [status, setStatus] = useState('');
     const [statusCounts, setStatusCounts] = useState({});
 
+    // Status label mapping
+    const getStatusLabel = (status) => {
+        const labels = {
+            'ACTIVE': 'Active',
+            'INACTIVE': 'Hidden',
+            'PENDING': 'In Discussion',
+            'COMPLETED': 'Completed'
+        };
+        return labels[status] || status;
+    };
+
 
     // List & Loading States
     const [myItems, setMyItems] = useState([]);
@@ -104,6 +115,7 @@ const MyItems = () => {
             setEditingItem(updated);
             setMyItems(prev => prev.map(item => item.id === id ? updated : item));
         }
+        setStatusCounts(data.statusCount || {});
     };
 
     // --- ITEM DATA HANDLERS ---
@@ -153,14 +165,26 @@ const MyItems = () => {
     const handleSaveEdit = async () => {
         try {
             setLoading(true);
-            await ItemService.updateItem(editingItem.id, {
-                name: editingItem.name,
-                description: editingItem.description,
-                type: editingItem.type,
-                availabilityType: editingItem.availabilityType,
-                condition: editingItem.condition,
-                status: editingItem.status
-            });
+            
+            const statusChanged = editingItem.status !== originalItem.status;
+            const otherFieldsChanged = editingItem.name !== originalItem.name ||
+                editingItem.description !== originalItem.description ||
+                editingItem.type !== originalItem.type ||
+                editingItem.availabilityType !== originalItem.availabilityType ||
+                editingItem.condition !== originalItem.condition;
+
+            if (statusChanged && !otherFieldsChanged) {
+                await ItemService.updateItemStatus(editingItem.id, editingItem.status);
+            } else {
+                await ItemService.updateItem(editingItem.id, {
+                    name: editingItem.name,
+                    description: editingItem.description,
+                    type: editingItem.type,
+                    availabilityType: editingItem.availabilityType,
+                    condition: editingItem.condition,
+                    status: editingItem.status
+                });
+            }
 
             setMessage('Item details updated!');
             setIsError(false);
@@ -479,7 +503,7 @@ const MyItems = () => {
                             {Object.entries(statusCounts).map(([status, count]) =>
                                     count > 0 && (
                                         <span key={status}>
-                    <strong>{status}:</strong> {count}
+                    <strong>{getStatusLabel(status)}:</strong> {count}
                 </span>
                                     )
                             )}
