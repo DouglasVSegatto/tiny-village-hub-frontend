@@ -29,6 +29,8 @@ const MyItems = () => {
     const [itemsLoading, setItemsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [sortField, setSortField] = useState(null);
+    const [sortDirection, setSortDirection] = useState('asc');
 
 
     const [editingItem, setEditingItem] = useState(null);
@@ -224,6 +226,24 @@ const MyItems = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSort = (field) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const getSortedItems = () => {
+        if (!sortField) return myItems;
+        return [...myItems].sort((a, b) => {
+            const aVal = a[sortField]?.toLowerCase() || '';
+            const bVal = b[sortField]?.toLowerCase() || '';
+            return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
     };
 
     return (
@@ -521,14 +541,20 @@ const MyItems = () => {
                                 <thead className="table-light">
                                 <tr>
                                     <th>Main Photo</th>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
+                                    <th style={{cursor: 'pointer'}} onClick={() => handleSort('name')}>
+                                        Name {sortField === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                    </th>
+                                    <th style={{cursor: 'pointer'}} onClick={() => handleSort('type')}>
+                                        Type {sortField === 'type' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                    </th>
+                                    <th style={{cursor: 'pointer'}} onClick={() => handleSort('status')}>
+                                        Status {sortField === 'status' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                    </th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {myItems.map(item => (
+                                {getSortedItems().map(item => (
                                     <tr key={item.id}>
                                         <td>
                                             <img src={item.imageUrls?.[0] || 'https://via.placeholder.com/50'}

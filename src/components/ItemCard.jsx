@@ -106,7 +106,7 @@ const ItemCard = ({ item }) => {
                     <div className="d-flex justify-content-between text-muted">
                         <span>Location:</span>
                         <span className="fw-semibold text-dark">
-                            {[item.neighbourhood, item.city, item.state, item.country].filter(Boolean).join(', ')}
+                            {[item.ownerNeighbourhood, item.ownerCity, item.ownerState, item.ownerCountry].filter(Boolean).join(', ')}
                         </span>
                     </div>
                     <div className="d-flex justify-content-between text-muted">
